@@ -1,0 +1,134 @@
+INFO:2026-05-31 00:31:58 2243688:2243688 init.cpp:149] Registering daemon config loader, cpuOnly =  0
+INFO:2026-05-31 00:31:58 2243688:2243688 CuptiActivityProfiler.cpp:245] CUDA versions. CUPTI: 26; Runtime: 12080; Driver: 13000
+00:32:00 INFO === experiment-runner :: dinov3_base_focalonly_normal_d3_d4 (task=classification smoke=False) ===
+00:32:00 INFO spec=/home/seungeon/Workspace/side/radish/_workspace/specs/exp_dinov3_base_focalonly_normal_d3_d4.yaml outdir=/home/seungeon/Workspace/side/radish/experiments/dinov3_base_focalonly_normal_d3_d4 device=cuda:1
+00:32:00 INFO seed=42 cudnn.benchmark=True deterministic=False
+00:32:00 INFO device=cuda:1 gpu=NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition
+00:32:01 INFO Building classification loaders: setting=normal_d3_d4 img=512 bs=64 aug=default
+00:32:35 INFO class_names=['normal', 'disease_3', 'disease_4'] train_counts={'normal': 227, 'disease_3': 227, 'disease_4': 227} valid_counts={'normal': 1303, 'disease_3': 76, 'disease_4': 24}
+00:32:37 INFO loss=focal gamma=2.00 class_weights_used=True label_smoothing=0.000
+00:32:37 INFO optimizer params: trainable=395267 total=86036483 (0.46%)
+/home/seungeon/Workspace/side/radish/src/train.py:284: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  running_loss += float(loss) * images.size(0)
+00:32:42 INFO ep0 step0 loss=0.4873 lr=3.03e-05
+00:32:44 INFO ep0 step10 loss=0.3832 lr=3.33e-04
+00:32:50 INFO [ep0] train_loss=0.4514 val_loss=0.4057 val_pr_auc=0.4995 auroc=0.9658 f1_macro=0.4201 recall_macro=0.6606 prec_macro=0.4201 acc=0.7092 (13.1s)
+00:32:52 INFO ep1 step0 loss=0.3644 lr=3.64e-04
+00:32:55 INFO ep1 step10 loss=0.2165 lr=6.67e-04
+00:32:59 INFO [ep1] train_loss=0.2750 val_loss=0.1864 val_pr_auc=0.6156 auroc=0.9834 f1_macro=0.5110 recall_macro=0.7056 prec_macro=0.6572 acc=0.8161 (8.8s)
+00:33:02 INFO ep2 step0 loss=0.1554 lr=6.97e-04
+00:33:04 INFO ep2 step10 loss=0.1354 lr=1.00e-03
+00:33:09 INFO [ep2] train_loss=0.1331 val_loss=0.1068 val_pr_auc=0.6428 auroc=0.9883 f1_macro=0.5960 recall_macro=0.7918 prec_macro=0.5729 acc=0.9066 (9.1s)
+00:33:11 INFO ep3 step0 loss=0.1142 lr=1.00e-03
+00:33:13 INFO ep3 step10 loss=0.1245 lr=9.99e-04
+00:33:18 INFO [ep3] train_loss=0.1071 val_loss=0.1093 val_pr_auc=0.6706 auroc=0.9897 f1_macro=0.6327 recall_macro=0.8013 prec_macro=0.5741 acc=0.9159 (8.5s)
+00:33:21 INFO ep4 step0 loss=0.1118 lr=9.98e-04
+00:33:23 INFO ep4 step10 loss=0.0628 lr=9.93e-04
+00:33:27 INFO [ep4] train_loss=0.0912 val_loss=0.0691 val_pr_auc=0.6984 auroc=0.9926 f1_macro=0.6734 recall_macro=0.8268 prec_macro=0.7080 acc=0.9351 (8.7s)
+00:33:30 INFO ep5 step0 loss=0.0960 lr=9.93e-04
+00:33:32 INFO ep5 step10 loss=0.0980 lr=9.85e-04
+00:33:37 INFO [ep5] train_loss=0.0801 val_loss=0.0549 val_pr_auc=0.7083 auroc=0.9929 f1_macro=0.7220 recall_macro=0.8472 prec_macro=0.7116 acc=0.9530 (8.5s)
+00:33:39 INFO ep6 step0 loss=0.0634 lr=9.84e-04
+00:33:41 INFO ep6 step10 loss=0.1182 lr=9.73e-04
+00:33:46 INFO [ep6] train_loss=0.0785 val_loss=0.0430 val_pr_auc=0.7147 auroc=0.9932 f1_macro=0.7109 recall_macro=0.7771 prec_macro=0.6646 acc=0.9579 (8.3s)
+00:33:49 INFO ep7 step0 loss=0.0705 lr=9.71e-04
+00:33:50 INFO ep7 step10 loss=0.0555 lr=9.57e-04
+00:33:55 INFO [ep7] train_loss=0.0697 val_loss=0.0681 val_pr_auc=0.7046 auroc=0.9923 f1_macro=0.6853 recall_macro=0.8397 prec_macro=0.7110 acc=0.9366 (8.4s)
+00:33:57 INFO ep8 step0 loss=0.0626 lr=9.56e-04
+00:33:59 INFO ep8 step10 loss=0.0740 lr=9.38e-04
+00:34:04 INFO [ep8] train_loss=0.0698 val_loss=0.0474 val_pr_auc=0.7080 auroc=0.9926 f1_macro=0.7171 recall_macro=0.8144 prec_macro=0.6890 acc=0.9558 (8.6s)
+00:34:06 INFO ep9 step0 loss=0.0571 lr=9.37e-04
+00:34:08 INFO ep9 step10 loss=0.0847 lr=9.16e-04
+00:34:12 INFO [ep9] train_loss=0.0652 val_loss=0.0473 val_pr_auc=0.7142 auroc=0.9927 f1_macro=0.7290 recall_macro=0.8482 prec_macro=0.7237 acc=0.9558 (8.4s)
+00:34:15 INFO ep10 step0 loss=0.0649 lr=9.14e-04
+00:34:17 INFO ep10 step10 loss=0.0585 lr=8.91e-04
+00:34:21 INFO [ep10] train_loss=0.0626 val_loss=0.0437 val_pr_auc=0.7150 auroc=0.9926 f1_macro=0.7362 recall_macro=0.7993 prec_macro=0.6899 acc=0.9622 (8.5s)
+00:34:24 INFO ep11 step0 loss=0.0838 lr=8.89e-04
+00:34:26 INFO ep11 step10 loss=0.0685 lr=8.64e-04
+00:34:30 INFO [ep11] train_loss=0.0610 val_loss=0.0394 val_pr_auc=0.7224 auroc=0.9932 f1_macro=0.7225 recall_macro=0.8271 prec_macro=0.7229 acc=0.9579 (8.6s)
+00:34:33 INFO ep12 step0 loss=0.0641 lr=8.61e-04
+00:34:35 INFO ep12 step10 loss=0.0545 lr=8.33e-04
+00:34:40 INFO [ep12] train_loss=0.0602 val_loss=0.0508 val_pr_auc=0.7128 auroc=0.9922 f1_macro=0.7213 recall_macro=0.8344 prec_macro=0.7118 acc=0.9551 (8.5s)
+00:34:42 INFO ep13 step0 loss=0.0810 lr=8.30e-04
+00:34:44 INFO ep13 step10 loss=0.0713 lr=8.00e-04
+00:34:48 INFO [ep13] train_loss=0.0547 val_loss=0.0430 val_pr_auc=0.7249 auroc=0.9926 f1_macro=0.7305 recall_macro=0.8344 prec_macro=0.7028 acc=0.9587 (8.5s)
+00:34:51 INFO ep14 step0 loss=0.0462 lr=7.97e-04
+00:34:53 INFO ep14 step10 loss=0.0374 lr=7.65e-04
+00:34:58 INFO [ep14] train_loss=0.0546 val_loss=0.0361 val_pr_auc=0.7312 auroc=0.9929 f1_macro=0.7531 recall_macro=0.8450 prec_macro=0.7226 acc=0.9651 (8.6s)
+00:35:00 INFO ep15 step0 loss=0.0680 lr=7.62e-04
+00:35:02 INFO ep15 step10 loss=0.0324 lr=7.29e-04
+00:35:07 INFO [ep15] train_loss=0.0505 val_loss=0.0414 val_pr_auc=0.7163 auroc=0.9922 f1_macro=0.7243 recall_macro=0.8013 prec_macro=0.6818 acc=0.9608 (8.6s)
+00:35:09 INFO ep16 step0 loss=0.0636 lr=7.25e-04
+00:35:11 INFO ep16 step10 loss=0.0662 lr=6.90e-04
+00:35:15 INFO [ep16] train_loss=0.0484 val_loss=0.0475 val_pr_auc=0.7267 auroc=0.9928 f1_macro=0.6987 recall_macro=0.8139 prec_macro=0.7228 acc=0.9522 (8.2s)
+00:35:18 INFO ep17 step0 loss=0.0454 lr=6.86e-04
+00:35:20 INFO ep17 step10 loss=0.0538 lr=6.50e-04
+00:35:24 INFO [ep17] train_loss=0.0560 val_loss=0.0377 val_pr_auc=0.7310 auroc=0.9929 f1_macro=0.7519 recall_macro=0.8486 prec_macro=0.7158 acc=0.9636 (8.3s)
+00:35:27 INFO ep18 step0 loss=0.0833 lr=6.46e-04
+00:35:28 INFO ep18 step10 loss=0.0746 lr=6.09e-04
+00:35:33 INFO [ep18] train_loss=0.0530 val_loss=0.0430 val_pr_auc=0.7275 auroc=0.9927 f1_macro=0.7291 recall_macro=0.8356 prec_macro=0.7182 acc=0.9587 (8.6s)
+00:35:36 INFO ep19 step0 loss=0.0360 lr=6.05e-04
+00:35:37 INFO ep19 step10 loss=0.0410 lr=5.67e-04
+00:35:42 INFO [ep19] train_loss=0.0524 val_loss=0.0446 val_pr_auc=0.7158 auroc=0.9925 f1_macro=0.7095 recall_macro=0.8178 prec_macro=0.7088 acc=0.9551 (8.3s)
+00:35:44 INFO ep20 step0 loss=0.0686 lr=5.64e-04
+00:35:46 INFO ep20 step10 loss=0.0517 lr=5.25e-04
+00:35:50 INFO [ep20] train_loss=0.0478 val_loss=0.0444 val_pr_auc=0.7319 auroc=0.9928 f1_macro=0.7092 recall_macro=0.8230 prec_macro=0.7269 acc=0.9544 (8.0s)
+00:35:53 INFO ep21 step0 loss=0.0470 lr=5.21e-04
+00:35:55 INFO ep21 step10 loss=0.0315 lr=4.83e-04
+00:35:59 INFO [ep21] train_loss=0.0458 val_loss=0.0408 val_pr_auc=0.7315 auroc=0.9928 f1_macro=0.7287 recall_macro=0.8356 prec_macro=0.7149 acc=0.9587 (8.6s)
+00:36:02 INFO ep22 step0 loss=0.0333 lr=4.79e-04
+00:36:04 INFO ep22 step10 loss=0.0260 lr=4.40e-04
+00:36:08 INFO [ep22] train_loss=0.0430 val_loss=0.0423 val_pr_auc=0.7196 auroc=0.9924 f1_macro=0.7354 recall_macro=0.8442 prec_macro=0.7028 acc=0.9594 (8.3s)
+00:36:11 INFO ep23 step0 loss=0.0438 lr=4.36e-04
+00:36:12 INFO ep23 step10 loss=0.0575 lr=3.98e-04
+00:36:17 INFO [ep23] train_loss=0.0502 val_loss=0.0432 val_pr_auc=0.7192 auroc=0.9919 f1_macro=0.7406 recall_macro=0.8047 prec_macro=0.6936 acc=0.9622 (8.3s)
+00:36:19 INFO ep24 step0 loss=0.0654 lr=3.95e-04
+00:36:21 INFO ep24 step10 loss=0.0732 lr=3.57e-04
+00:36:25 INFO [ep24] train_loss=0.0484 val_loss=0.0401 val_pr_auc=0.7153 auroc=0.9924 f1_macro=0.7755 recall_macro=0.8607 prec_macro=0.7224 acc=0.9665 (8.2s)
+00:36:28 INFO ep25 step0 loss=0.0583 lr=3.54e-04
+00:36:30 INFO ep25 step10 loss=0.0289 lr=3.17e-04
+00:36:34 INFO [ep25] train_loss=0.0506 val_loss=0.0376 val_pr_auc=0.7167 auroc=0.9927 f1_macro=0.7411 recall_macro=0.8052 prec_macro=0.6947 acc=0.9636 (8.4s)
+00:36:36 INFO ep26 step0 loss=0.0592 lr=3.14e-04
+00:36:38 INFO ep26 step10 loss=0.0461 lr=2.78e-04
+00:36:42 INFO [ep26] train_loss=0.0455 val_loss=0.0370 val_pr_auc=0.7176 auroc=0.9930 f1_macro=0.7543 recall_macro=0.8542 prec_macro=0.7305 acc=0.9644 (8.0s)
+00:36:45 INFO ep27 step0 loss=0.0681 lr=2.75e-04
+00:36:47 INFO ep27 step10 loss=0.0403 lr=2.41e-04
+00:36:51 INFO [ep27] train_loss=0.0445 val_loss=0.0380 val_pr_auc=0.7163 auroc=0.9930 f1_macro=0.7350 recall_macro=0.8403 prec_macro=0.7186 acc=0.9601 (8.5s)
+00:36:53 INFO ep28 step0 loss=0.0448 lr=2.38e-04
+00:36:55 INFO ep28 step10 loss=0.0357 lr=2.06e-04
+00:36:59 INFO [ep28] train_loss=0.0407 val_loss=0.0384 val_pr_auc=0.7364 auroc=0.9930 f1_macro=0.7350 recall_macro=0.8403 prec_macro=0.7186 acc=0.9601 (7.8s)
+00:37:02 INFO ep29 step0 loss=0.0275 lr=2.03e-04
+00:37:04 INFO ep29 step10 loss=0.0137 lr=1.73e-04
+00:37:08 INFO [ep29] train_loss=0.0384 val_loss=0.0425 val_pr_auc=0.7348 auroc=0.9929 f1_macro=0.7352 recall_macro=0.8493 prec_macro=0.7287 acc=0.9587 (8.1s)
+00:37:10 INFO ep30 step0 loss=0.0374 lr=1.70e-04
+00:37:12 INFO ep30 step10 loss=0.0234 lr=1.42e-04
+00:37:17 INFO [ep30] train_loss=0.0378 val_loss=0.0378 val_pr_auc=0.7309 auroc=0.9929 f1_macro=0.7465 recall_macro=0.8403 prec_macro=0.7159 acc=0.9636 (8.4s)
+00:37:19 INFO ep31 step0 loss=0.0441 lr=1.39e-04
+00:37:21 INFO ep31 step10 loss=0.0238 lr=1.13e-04
+00:37:25 INFO [ep31] train_loss=0.0387 val_loss=0.0419 val_pr_auc=0.7303 auroc=0.9928 f1_macro=0.7271 recall_macro=0.8354 prec_macro=0.7135 acc=0.9579 (8.3s)
+00:37:28 INFO ep32 step0 loss=0.0363 lr=1.11e-04
+00:37:30 INFO ep32 step10 loss=0.0305 lr=8.79e-05
+00:37:34 INFO [ep32] train_loss=0.0396 val_loss=0.0393 val_pr_auc=0.7285 auroc=0.9928 f1_macro=0.7345 recall_macro=0.8403 prec_macro=0.7102 acc=0.9601 (8.3s)
+00:37:37 INFO ep33 step0 loss=0.0297 lr=8.57e-05
+00:37:38 INFO ep33 step10 loss=0.0443 lr=6.54e-05
+00:37:43 INFO [ep33] train_loss=0.0381 val_loss=0.0394 val_pr_auc=0.7292 auroc=0.9928 f1_macro=0.7364 recall_macro=0.8405 prec_macro=0.7144 acc=0.9608 (8.4s)
+00:37:45 INFO ep34 step0 loss=0.0307 lr=6.35e-05
+00:37:47 INFO ep34 step10 loss=0.0572 lr=4.60e-05
+00:37:51 INFO [ep34] train_loss=0.0369 val_loss=0.0399 val_pr_auc=0.7308 auroc=0.9929 f1_macro=0.7316 recall_macro=0.8398 prec_macro=0.7157 acc=0.9587 (8.3s)
+00:37:54 INFO ep35 step0 loss=0.0408 lr=4.44e-05
+00:37:56 INFO ep35 step10 loss=0.0598 lr=2.99e-05
+00:38:00 INFO [ep35] train_loss=0.0401 val_loss=0.0389 val_pr_auc=0.7296 auroc=0.9928 f1_macro=0.7383 recall_macro=0.8408 prec_macro=0.7161 acc=0.9615 (8.3s)
+00:38:03 INFO ep36 step0 loss=0.0533 lr=2.86e-05
+00:38:04 INFO ep36 step10 loss=0.0504 lr=1.71e-05
+00:38:08 INFO [ep36] train_loss=0.0386 val_loss=0.0392 val_pr_auc=0.7319 auroc=0.9929 f1_macro=0.7367 recall_macro=0.8405 prec_macro=0.7201 acc=0.9608 (8.0s)
+00:38:11 INFO ep37 step0 loss=0.0479 lr=1.61e-05
+00:38:13 INFO ep37 step10 loss=0.0299 lr=7.86e-06
+00:38:17 INFO [ep37] train_loss=0.0399 val_loss=0.0392 val_pr_auc=0.7316 auroc=0.9929 f1_macro=0.7367 recall_macro=0.8405 prec_macro=0.7201 acc=0.9608 (8.2s)
+00:38:19 INFO ep38 step0 loss=0.0263 lr=7.19e-06
+00:38:21 INFO ep38 step10 loss=0.0359 lr=2.14e-06
+00:38:25 INFO [ep38] train_loss=0.0380 val_loss=0.0392 val_pr_auc=0.7316 auroc=0.9929 f1_macro=0.7367 recall_macro=0.8405 prec_macro=0.7201 acc=0.9608 (8.1s)
+00:38:28 INFO ep39 step0 loss=0.0355 lr=1.80e-06
+00:38:30 INFO ep39 step10 loss=0.0479 lr=1.49e-08
+00:38:34 INFO [ep39] train_loss=0.0396 val_loss=0.0391 val_pr_auc=0.7316 auroc=0.9929 f1_macro=0.7367 recall_macro=0.8405 prec_macro=0.7201 acc=0.9608 (8.1s)
+00:38:35 INFO === DONE status=ok elapsed=393.8s outdir=/home/seungeon/Workspace/side/radish/experiments/dinov3_base_focalonly_normal_d3_d4 ===

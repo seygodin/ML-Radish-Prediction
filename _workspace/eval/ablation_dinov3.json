@@ -1,0 +1,915 @@
+{
+  "setting": "normal_d3_d4",
+  "num_classes": 3,
+  "seed": 42,
+  "valid_manifest_dist": {
+    "0": 1303,
+    "1": 76,
+    "2": 24
+  },
+  "valid_manifest_total": 1403,
+  "results": {
+    "dinov3_base_normal_d3_d4": {
+      "role": "reference (base, CE/default)",
+      "loss_label": "CE",
+      "aug_label": "default",
+      "arch": "dinov3_base",
+      "img_size": 512,
+      "aug": "default",
+      "loss_type": "cross_entropy",
+      "gamma": null,
+      "class_weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "label_smoothing": 0.0,
+      "trainable_params": 395267,
+      "best_epoch": 29,
+      "class_names": [
+        "normal",
+        "disease_3",
+        "disease_4"
+      ],
+      "n_valid": 1403,
+      "metrics": {
+        "accuracy": 0.9672131147540983,
+        "recall_macro": 0.8399493072666316,
+        "precision_macro": 0.7546195341894267,
+        "f1_macro": 0.750217685101406,
+        "auroc": 0.9927131789563676,
+        "pr_auc": 0.7452463408150547,
+        "confusion": [
+          [
+            1286,
+            1,
+            16
+          ],
+          [
+            1,
+            50,
+            25
+          ],
+          [
+            0,
+            3,
+            21
+          ]
+        ]
+      },
+      "per_class": {
+        "0": {
+          "recall": 0.9869531849577897,
+          "precision": 0.9992229992229992,
+          "support": 1303,
+          "tp": 1286,
+          "pred_pos": 1287
+        },
+        "1": {
+          "recall": 0.6578947368421053,
+          "precision": 0.9259259259259259,
+          "support": 76,
+          "tp": 50,
+          "pred_pos": 54
+        },
+        "2": {
+          "recall": 0.875,
+          "precision": 0.3387096774193548,
+          "support": 24,
+          "tp": 21,
+          "pred_pos": 62
+        }
+      },
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      },
+      "reported_vs_recomputed": {
+        "pr_auc": [
+          0.7452463408150547,
+          0.7452463408150547
+        ],
+        "f1_macro": [
+          0.750217685101406,
+          0.750217685101406
+        ],
+        "recall_macro": [
+          0.8399493072666316,
+          0.8399493072666316
+        ],
+        "precision_macro": [
+          0.7546195341894267,
+          0.7546195341894267
+        ],
+        "auroc": [
+          0.9927131789563676,
+          0.9927131789563676
+        ],
+        "accuracy": [
+          0.9672131147540983,
+          0.9672131147540983
+        ]
+      },
+      "sklearn_crosscheck": {
+        "pr_auc_d3": 0.8965183925177423,
+        "pr_auc_d4": 0.5939742891123669
+      }
+    },
+    "dinov3_base_augonly_normal_d3_d4": {
+      "role": "aug-only",
+      "loss_label": "CE",
+      "aug_label": "strong",
+      "arch": "dinov3_base",
+      "img_size": 512,
+      "aug": "strong",
+      "loss_type": "cross_entropy",
+      "gamma": null,
+      "class_weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "label_smoothing": 0.0,
+      "trainable_params": 395267,
+      "best_epoch": 26,
+      "class_names": [
+        "normal",
+        "disease_3",
+        "disease_4"
+      ],
+      "n_valid": 1403,
+      "metrics": {
+        "accuracy": 0.9729151817533856,
+        "recall_macro": 0.8419958664889391,
+        "precision_macro": 0.7713475380142047,
+        "f1_macro": 0.7679477309962298,
+        "auroc": 0.9945907048925265,
+        "pr_auc": 0.7557948748004824,
+        "confusion": [
+          [
+            1294,
+            1,
+            8
+          ],
+          [
+            1,
+            50,
+            25
+          ],
+          [
+            0,
+            3,
+            21
+          ]
+        ]
+      },
+      "per_class": {
+        "0": {
+          "recall": 0.9930928626247122,
+          "precision": 0.9992277992277993,
+          "support": 1303,
+          "tp": 1294,
+          "pred_pos": 1295
+        },
+        "1": {
+          "recall": 0.6578947368421053,
+          "precision": 0.9259259259259259,
+          "support": 76,
+          "tp": 50,
+          "pred_pos": 54
+        },
+        "2": {
+          "recall": 0.875,
+          "precision": 0.3888888888888889,
+          "support": 24,
+          "tp": 21,
+          "pred_pos": 54
+        }
+      },
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      },
+      "reported_vs_recomputed": {
+        "pr_auc": [
+          0.7557948748004824,
+          0.7557948748004824
+        ],
+        "f1_macro": [
+          0.7679477309962298,
+          0.7679477309962298
+        ],
+        "recall_macro": [
+          0.8419958664889391,
+          0.8419958664889391
+        ],
+        "precision_macro": [
+          0.7713475380142047,
+          0.7713475380142047
+        ],
+        "auroc": [
+          0.9945907048925265,
+          0.9945907048925265
+        ],
+        "accuracy": [
+          0.9729151817533856,
+          0.9729151817533856
+        ]
+      },
+      "sklearn_crosscheck": {
+        "pr_auc_d3": 0.9225614067190686,
+        "pr_auc_d4": 0.589028342881896
+      }
+    },
+    "dinov3_base_focalonly_normal_d3_d4": {
+      "role": "focal-only",
+      "loss_label": "focal g2",
+      "aug_label": "default",
+      "arch": "dinov3_base",
+      "img_size": 512,
+      "aug": "default",
+      "loss_type": "focal",
+      "gamma": 2.0,
+      "class_weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "label_smoothing": 0.0,
+      "trainable_params": 395267,
+      "best_epoch": 28,
+      "class_names": [
+        "normal",
+        "disease_3",
+        "disease_4"
+      ],
+      "n_valid": 1403,
+      "metrics": {
+        "accuracy": 0.9600855310049893,
+        "recall_macro": 0.8402786192906159,
+        "precision_macro": 0.7185501066098081,
+        "f1_macro": 0.7349642980312359,
+        "auroc": 0.9929647145665471,
+        "pr_auc": 0.7363963763737873,
+        "confusion": [
+          [
+            1273,
+            5,
+            25
+          ],
+          [
+            0,
+            54,
+            22
+          ],
+          [
+            0,
+            4,
+            20
+          ]
+        ]
+      },
+      "per_class": {
+        "0": {
+          "recall": 0.9769762087490407,
+          "precision": 1.0,
+          "support": 1303,
+          "tp": 1273,
+          "pred_pos": 1273
+        },
+        "1": {
+          "recall": 0.7105263157894737,
+          "precision": 0.8571428571428571,
+          "support": 76,
+          "tp": 54,
+          "pred_pos": 63
+        },
+        "2": {
+          "recall": 0.8333333333333334,
+          "precision": 0.29850746268656714,
+          "support": 24,
+          "tp": 20,
+          "pred_pos": 67
+        }
+      },
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      },
+      "reported_vs_recomputed": {
+        "pr_auc": [
+          0.7363963763737873,
+          0.7363963763737873
+        ],
+        "f1_macro": [
+          0.7349642980312359,
+          0.7349642980312359
+        ],
+        "recall_macro": [
+          0.8402786192906159,
+          0.8402786192906159
+        ],
+        "precision_macro": [
+          0.7185501066098081,
+          0.7185501066098081
+        ],
+        "auroc": [
+          0.9929647145665471,
+          0.9929647145665471
+        ],
+        "accuracy": [
+          0.9600855310049893,
+          0.9600855310049893
+        ]
+      },
+      "sklearn_crosscheck": {
+        "pr_auc_d3": 0.903837492077171,
+        "pr_auc_d4": 0.5689552606704037
+      }
+    },
+    "dinov3_base_focalg1_normal_d3_d4": {
+      "role": "gamma=1 (strong aug)",
+      "loss_label": "focal g1",
+      "aug_label": "strong",
+      "arch": "dinov3_base",
+      "img_size": 512,
+      "aug": "strong",
+      "loss_type": "focal",
+      "gamma": 1.0,
+      "class_weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "label_smoothing": 0.0,
+      "trainable_params": 395267,
+      "best_epoch": 26,
+      "class_names": [
+        "normal",
+        "disease_3",
+        "disease_4"
+      ],
+      "n_valid": 1403,
+      "metrics": {
+        "accuracy": 0.9743406985032074,
+        "recall_macro": 0.8548979413229928,
+        "precision_macro": 0.7749283372678603,
+        "f1_macro": 0.7822697065308805,
+        "auroc": 0.994710501168909,
+        "pr_auc": 0.7579226891622137,
+        "confusion": [
+          [
+            1293,
+            2,
+            8
+          ],
+          [
+            1,
+            53,
+            22
+          ],
+          [
+            0,
+            3,
+            21
+          ]
+        ]
+      },
+      "per_class": {
+        "0": {
+          "recall": 0.9923254029163469,
+          "precision": 0.999227202472952,
+          "support": 1303,
+          "tp": 1293,
+          "pred_pos": 1294
+        },
+        "1": {
+          "recall": 0.6973684210526315,
+          "precision": 0.9137931034482759,
+          "support": 76,
+          "tp": 53,
+          "pred_pos": 58
+        },
+        "2": {
+          "recall": 0.875,
+          "precision": 0.4117647058823529,
+          "support": 24,
+          "tp": 21,
+          "pred_pos": 51
+        }
+      },
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      },
+      "reported_vs_recomputed": {
+        "pr_auc": [
+          0.7579226891622137,
+          0.7579226891622137
+        ],
+        "f1_macro": [
+          0.7822697065308805,
+          0.7822697065308805
+        ],
+        "recall_macro": [
+          0.8548979413229928,
+          0.8548979413229928
+        ],
+        "precision_macro": [
+          0.7749283372678603,
+          0.7749283372678603
+        ],
+        "auroc": [
+          0.994710501168909,
+          0.994710501168909
+        ],
+        "accuracy": [
+          0.9743406985032074,
+          0.9743406985032074
+        ]
+      },
+      "sklearn_crosscheck": {
+        "pr_auc_d3": 0.9212423319012046,
+        "pr_auc_d4": 0.5946030464232227
+      }
+    },
+    "dinov3_base_focal_normal_d3_d4": {
+      "role": "reference (focal+aug, gamma=2)",
+      "loss_label": "focal g2",
+      "aug_label": "strong",
+      "arch": "dinov3_base",
+      "img_size": 512,
+      "aug": "strong",
+      "loss_type": "focal",
+      "gamma": 2.0,
+      "class_weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "label_smoothing": 0.0,
+      "trainable_params": 395267,
+      "best_epoch": 26,
+      "class_names": [
+        "normal",
+        "disease_3",
+        "disease_4"
+      ],
+      "n_valid": 1403,
+      "metrics": {
+        "accuracy": 0.9729151817533856,
+        "recall_macro": 0.8502561565079237,
+        "precision_macro": 0.7692445738812587,
+        "f1_macro": 0.7742623121748902,
+        "auroc": 0.9951155814296849,
+        "pr_auc": 0.7647347276777785,
+        "confusion": [
+          [
+            1292,
+            2,
+            9
+          ],
+          [
+            1,
+            52,
+            23
+          ],
+          [
+            0,
+            3,
+            21
+          ]
+        ]
+      },
+      "per_class": {
+        "0": {
+          "recall": 0.9915579432079816,
+          "precision": 0.9992266047950503,
+          "support": 1303,
+          "tp": 1292,
+          "pred_pos": 1293
+        },
+        "1": {
+          "recall": 0.6842105263157895,
+          "precision": 0.9122807017543859,
+          "support": 76,
+          "tp": 52,
+          "pred_pos": 57
+        },
+        "2": {
+          "recall": 0.875,
+          "precision": 0.39622641509433965,
+          "support": 24,
+          "tp": 21,
+          "pred_pos": 53
+        }
+      },
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      },
+      "reported_vs_recomputed": {
+        "pr_auc": [
+          0.7647347276777785,
+          0.7647347276777785
+        ],
+        "f1_macro": [
+          0.7742623121748902,
+          0.7742623121748902
+        ],
+        "recall_macro": [
+          0.8502561565079237,
+          0.8502561565079237
+        ],
+        "precision_macro": [
+          0.7692445738812587,
+          0.7692445738812587
+        ],
+        "auroc": [
+          0.9951155814296849,
+          0.9951155814296849
+        ],
+        "accuracy": [
+          0.9729151817533856,
+          0.9729151817533856
+        ]
+      },
+      "sklearn_crosscheck": {
+        "pr_auc_d3": 0.9238534578974742,
+        "pr_auc_d4": 0.6056159974580829
+      }
+    },
+    "dinov3_base_focalg3_normal_d3_d4": {
+      "role": "gamma=3 (strong aug)",
+      "loss_label": "focal g3",
+      "aug_label": "strong",
+      "arch": "dinov3_base",
+      "img_size": 512,
+      "aug": "strong",
+      "loss_type": "focal",
+      "gamma": 3.0,
+      "class_weights": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "label_smoothing": 0.0,
+      "trainable_params": 395267,
+      "best_epoch": 26,
+      "class_names": [
+        "normal",
+        "disease_3",
+        "disease_4"
+      ],
+      "n_valid": 1403,
+      "metrics": {
+        "accuracy": 0.9714896650035638,
+        "recall_macro": 0.8456143716928546,
+        "precision_macro": 0.7639194912414727,
+        "f1_macro": 0.7664544028120526,
+        "auroc": 0.9953889484988904,
+        "pr_auc": 0.768528796664238,
+        "confusion": [
+          [
+            1291,
+            2,
+            10
+          ],
+          [
+            1,
+            51,
+            24
+          ],
+          [
+            0,
+            3,
+            21
+          ]
+        ]
+      },
+      "per_class": {
+        "0": {
+          "recall": 0.9907904834996163,
+          "precision": 0.9992260061919505,
+          "support": 1303,
+          "tp": 1291,
+          "pred_pos": 1292
+        },
+        "1": {
+          "recall": 0.6710526315789473,
+          "precision": 0.9107142857142857,
+          "support": 76,
+          "tp": 51,
+          "pred_pos": 56
+        },
+        "2": {
+          "recall": 0.875,
+          "precision": 0.38181818181818183,
+          "support": 24,
+          "tp": 21,
+          "pred_pos": 55
+        }
+      },
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      },
+      "reported_vs_recomputed": {
+        "pr_auc": [
+          0.768528796664238,
+          0.768528796664238
+        ],
+        "f1_macro": [
+          0.7664544028120526,
+          0.7664544028120526
+        ],
+        "recall_macro": [
+          0.8456143716928546,
+          0.8456143716928546
+        ],
+        "precision_macro": [
+          0.7639194912414727,
+          0.7639194912414727
+        ],
+        "auroc": [
+          0.9953889484988904,
+          0.9953889484988904
+        ],
+        "accuracy": [
+          0.9714896650035638,
+          0.9714896650035638
+        ]
+      },
+      "sklearn_crosscheck": {
+        "pr_auc_d3": 0.9292448484511391,
+        "pr_auc_d4": 0.607812744877337
+      }
+    }
+  },
+  "decomposition_2x2": {
+    "pr_auc": {
+      "base_CE_default": 0.7452463408150547,
+      "augonly_CE_strong": 0.7557948748004824,
+      "focalonly_focal_default": 0.7363963763737873,
+      "focal_aug_focal_strong": 0.7647347276777785,
+      "aug_effect": 0.010548533985427655,
+      "focal_effect": -0.0088499644412674,
+      "interaction": 0.01778981731856355,
+      "joint_effect": 0.019488386862723805,
+      "sum_check": 0.019488386862723805
+    },
+    "f1_macro": {
+      "base_CE_default": 0.750217685101406,
+      "augonly_CE_strong": 0.7679477309962298,
+      "focalonly_focal_default": 0.7349642980312359,
+      "focal_aug_focal_strong": 0.7742623121748902,
+      "aug_effect": 0.017730045894823854,
+      "focal_effect": -0.015253387070170099,
+      "interaction": 0.02156796824883045,
+      "joint_effect": 0.024044627073484204,
+      "sum_check": 0.024044627073484204
+    },
+    "accuracy": {
+      "base_CE_default": 0.9672131147540983,
+      "augonly_CE_strong": 0.9729151817533856,
+      "focalonly_focal_default": 0.9600855310049893,
+      "focal_aug_focal_strong": 0.9729151817533856,
+      "aug_effect": 0.005702066999287325,
+      "focal_effect": -0.0071275837491090455,
+      "interaction": 0.0071275837491090455,
+      "joint_effect": 0.005702066999287325,
+      "sum_check": 0.005702066999287325
+    },
+    "auroc": {
+      "base_CE_default": 0.9927131789563676,
+      "augonly_CE_strong": 0.9945907048925265,
+      "focalonly_focal_default": 0.9929647145665471,
+      "focal_aug_focal_strong": 0.9951155814296849,
+      "aug_effect": 0.0018775259361589747,
+      "focal_effect": 0.00025153561017954296,
+      "interaction": 0.00027334092697883783,
+      "joint_effect": 0.0024024024733173555,
+      "sum_check": 0.0024024024733173555
+    }
+  },
+  "d4_decomposition": {
+    "precision": {
+      "base": 0.3387096774193548,
+      "augonly": 0.3888888888888889,
+      "focalonly": 0.29850746268656714,
+      "focal_aug": 0.39622641509433965,
+      "aug_effect": 0.05017921146953408,
+      "focal_effect": -0.04020221473278768,
+      "interaction": 0.047539740938238484,
+      "joint_effect": 0.05751673767498483
+    },
+    "recall": {
+      "base": 0.875,
+      "augonly": 0.875,
+      "focalonly": 0.8333333333333334,
+      "focal_aug": 0.875,
+      "aug_effect": 0.0,
+      "focal_effect": -0.04166666666666663,
+      "interaction": 0.04166666666666663,
+      "joint_effect": 0.0
+    }
+  },
+  "gamma_sweep": {
+    "1.0": {
+      "run": "dinov3_base_focalg1_normal_d3_d4",
+      "pr_auc": 0.7579226891622137,
+      "f1_macro": 0.7822697065308805,
+      "accuracy": 0.9743406985032074,
+      "auroc": 0.994710501168909,
+      "d4_precision": 0.4117647058823529,
+      "d4_recall": 0.875,
+      "d3_precision": 0.9137931034482759,
+      "d3_recall": 0.6973684210526315
+    },
+    "2.0": {
+      "run": "dinov3_base_focal_normal_d3_d4",
+      "pr_auc": 0.7647347276777785,
+      "f1_macro": 0.7742623121748902,
+      "accuracy": 0.9729151817533856,
+      "auroc": 0.9951155814296849,
+      "d4_precision": 0.39622641509433965,
+      "d4_recall": 0.875,
+      "d3_precision": 0.9122807017543859,
+      "d3_recall": 0.6842105263157895
+    },
+    "3.0": {
+      "run": "dinov3_base_focalg3_normal_d3_d4",
+      "pr_auc": 0.768528796664238,
+      "f1_macro": 0.7664544028120526,
+      "accuracy": 0.9714896650035638,
+      "auroc": 0.9953889484988904,
+      "d4_precision": 0.38181818181818183,
+      "d4_recall": 0.875,
+      "d3_precision": 0.9107142857142857,
+      "d3_recall": 0.6710526315789473
+    }
+  },
+  "best_gamma": {
+    "by_pr_auc": 3.0,
+    "by_f1_macro": 1.0
+  },
+  "d4_wilson_ci_orig": {
+    "dinov3_base_normal_d3_d4": {
+      "tp": 21,
+      "support": 24,
+      "pred_pos": 62,
+      "recall": 0.875,
+      "recall_ci": [
+        0.6899571185214243,
+        0.9565574496068442
+      ],
+      "precision": 0.3387096774193548,
+      "precision_ci": [
+        0.2334153463018197,
+        0.46282532828689016
+      ]
+    },
+    "dinov3_base_augonly_normal_d3_d4": {
+      "tp": 21,
+      "support": 24,
+      "pred_pos": 54,
+      "recall": 0.875,
+      "recall_ci": [
+        0.6899571185214243,
+        0.9565574496068442
+      ],
+      "precision": 0.3888888888888889,
+      "precision_ci": [
+        0.2704174250997505,
+        0.5221194341849167
+      ]
+    },
+    "dinov3_base_focalonly_normal_d3_d4": {
+      "tp": 20,
+      "support": 24,
+      "pred_pos": 67,
+      "recall": 0.8333333333333334,
+      "recall_ci": [
+        0.6414652961213058,
+        0.9332143199927109
+      ],
+      "precision": 0.29850746268656714,
+      "precision_ci": [
+        0.2023136115497689,
+        0.41655439820720996
+      ]
+    },
+    "dinov3_base_focalg1_normal_d3_d4": {
+      "tp": 21,
+      "support": 24,
+      "pred_pos": 51,
+      "recall": 0.875,
+      "recall_ci": [
+        0.6899571185214243,
+        0.9565574496068442
+      ],
+      "precision": 0.4117647058823529,
+      "precision_ci": [
+        0.28754192992486893,
+        0.5483490725258254
+      ]
+    },
+    "dinov3_base_focal_normal_d3_d4": {
+      "tp": 21,
+      "support": 24,
+      "pred_pos": 53,
+      "recall": 0.875,
+      "recall_ci": [
+        0.6899571185214243,
+        0.9565574496068442
+      ],
+      "precision": 0.39622641509433965,
+      "precision_ci": [
+        0.27589211919038936,
+        0.5305876421111926
+      ]
+    },
+    "dinov3_base_focalg3_normal_d3_d4": {
+      "tp": 21,
+      "support": 24,
+      "pred_pos": 55,
+      "recall": 0.875,
+      "recall_ci": [
+        0.6899571185214243,
+        0.9565574496068442
+      ],
+      "precision": 0.38181818181818183,
+      "precision_ci": [
+        0.26515766317415235,
+        0.513910207176076
+      ]
+    }
+  },
+  "note": "Ablation on dinov3_base (DINOv3 ViT-B/16 frozen @512 + 2-layer head hidden512, trainable 395k, identical across all 6 runs). Only loss (CE / focal gamma) and aug (default / strong) vary. valid = original distribution normal 1303 / d3 76 / d4 24 (N=1403). class_weights from_meta resolve to all-ones (balanced-downsampled train loader) so focal acts via gamma (hard-example focusing), not alpha re-weighting. Single seed (42), d4 N=24 -> wide CI; treat sub-0.02 deltas as noise."
+}

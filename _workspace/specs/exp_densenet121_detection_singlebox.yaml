@@ -1,0 +1,57 @@
+# Auto-generated baseline spec. Self-contained: experiment-runner runs from this file alone.
+name: densenet121_detection_singlebox
+task: detection
+model:
+  builder: src.models.build_detector
+  arch: densenet121
+  img_size: 512
+  with_objectness: true
+  pretrained: false
+  source: timm
+  head: pooled-feature single-box regression (xyxy in [0,1]) + objectness
+data:
+  builder: build_detection_loaders
+  img_size: 512
+  batch_size: 8
+  num_workers: 8
+  include_normal: true
+optim:
+  name: adamw
+  lr: 0.0003
+  wd: 0.05
+  epochs: 60
+  sched: cosine
+  warmup_epochs: 5
+loss:
+  type: giou_l1_obj
+  giou_weight: 2.0
+  l1_weight: 5.0
+  obj_weight: 1.0
+  box_loss_on: positive_only
+eval:
+  metrics:
+  - det_pr_auc
+  - det_roc_auc
+  - presence_recall_at_0.5
+  - fp_rate_at_0.5
+  - iou_distribution
+  - iou_at_0.5_presence
+  - map_at_0.5
+  primary: det_pr_auc
+  note: 'normals supplied as negatives (empty GT). Primary = image-level disease
+    detection (det_pr_auc on objectness vs disease/normal). Localization IoU is
+    reported on POSITIVE images only; mAP@0.5 is standard detection.'
+early_stop:
+  monitor: val_det_pr_auc
+  mode: max
+  patience: 15
+seed: 42
+packages:
+- torch
+- torchvision
+- timm
+- einops
+- mambapy
+- scikit-learn
+- pyyaml
+smoke: true

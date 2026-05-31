@@ -1,0 +1,54 @@
+# Auto-generated baseline spec. Self-contained: experiment-runner runs from this file alone.
+name: densenet121_normal_vs_d3
+task: classification
+model:
+  builder: src.models.build_classifier
+  arch: densenet121
+  num_classes: 2
+  img_size: 224
+  pretrained: false
+  source: timm
+data:
+  builder: build_classification_loaders
+  setting: normal_vs_d3
+  img_size: 224
+  batch_size: 64
+  num_workers: 8
+optim:
+  name: adamw
+  lr: 0.0003
+  wd: 0.05
+  epochs: 60
+  sched: cosine
+  warmup_epochs: 5
+loss:
+  type: cross_entropy
+  class_weights: from_meta
+  label_smoothing: 0.0
+eval:
+  metrics:
+  - pr_auc
+  - macro_f1
+  - recall_disease
+  - precision_disease
+  - confusion
+  primary: pr_auc
+  primary_3class_note: for normal_d3_d4 use macro PR-AUC (one-vs-rest) as primary
+  threshold_policy: argmax for prediction; PR-AUC swept over disease score
+early_stop:
+  monitor: val_pr_auc
+  mode: max
+  patience: 15
+class_names:
+- normal
+- disease_3
+seed: 42
+packages:
+- torch
+- torchvision
+- timm
+- einops
+- mambapy
+- scikit-learn
+- pyyaml
+smoke: true

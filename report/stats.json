@@ -1,0 +1,78 @@
+{
+  "total_samples": 13101,
+  "by_split_class": {
+    "train/disease": 697,
+    "train/normal": 11001,
+    "valid/disease": 100,
+    "valid/normal": 1303
+  },
+  "class_imbalance_normal_to_disease": {
+    "train": 15.8,
+    "valid": 13.0
+  },
+  "disease_code_counts": {
+    "3": 546,
+    "4": 251
+  },
+  "disease_code_by_split": {
+    "train/3": 470,
+    "train/4": 227,
+    "valid/3": 76,
+    "valid/4": 24
+  },
+  "risk_distribution_disease": {
+    "1": 648,
+    "2": 122,
+    "3": 27
+  },
+  "risk_by_disease_code": {
+    "d3/risk1": 447,
+    "d3/risk2": 73,
+    "d3/risk3": 26,
+    "d4/risk1": 201,
+    "d4/risk2": 49,
+    "d4/risk3": 1
+  },
+  "image_format_counts": {
+    ".jpeg": 745,
+    ".jpg": 12356
+  },
+  "labels_with_zero_dims_in_json": 43,
+  "img_dims_median": {
+    "disease": [
+      4032,
+      3024
+    ],
+    "normal": [
+      3000,
+      4032
+    ]
+  },
+  "box_rel_area_by_class": {
+    "disease": {
+      "median": 0.5043,
+      "mean": 0.5103,
+      "min": 0.0318,
+      "max": 1.0
+    },
+    "normal": {
+      "median": 0.4527,
+      "mean": 0.4388,
+      "min": 0.0001,
+      "max": 1.0
+    }
+  },
+  "boxes_per_image_max": 1,
+  "multi_box_images": 0,
+  "date_range": [
+    "2020-10-06",
+    "2021-01-14"
+  ],
+  "grow_stage_disease": {
+    "11": 1,
+    "12": 796
+  },
+  "region_disease": {
+    "None": 797
+  }
+}

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>무(Radish) 질병 baseline 데모</title>
+<style>
+  :root { --bg:#0f1115; --panel:#181b22; --line:#2a2f3a; --fg:#e6e9ef; --mut:#9aa3b2; --acc:#4ea1ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;
+         background:var(--bg); color:var(--fg); }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); }
+  header h1 { margin:0; font-size:18px; }
+  header p { margin:4px 0 0; color:var(--mut); font-size:13px; }
+  .wrap { display:flex; gap:16px; padding:16px; align-items:flex-start; }
+  .col { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .left { width:380px; flex:0 0 380px; }
+  .right { flex:1; min-width:0; }
+  h2 { font-size:14px; margin:0 0 10px; color:var(--mut); text-transform:uppercase; letter-spacing:.04em; }
+  .sec { margin-bottom:18px; }
+  button { background:var(--acc); color:#04244a; border:none; border-radius:7px; padding:9px 14px;
+           font-weight:600; cursor:pointer; font-size:14px; }
+  button.secondary { background:#262b35; color:var(--fg); }
+  button:disabled { opacity:.5; cursor:default; }
+  input[type=file] { color:var(--mut); font-size:13px; }
+  select, input[type=number] { background:#0f1218; color:var(--fg); border:1px solid var(--line);
+           border-radius:6px; padding:5px 8px; font-size:13px; }
+  .gallery { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; max-height:260px; overflow-y:auto;
+             border:1px solid var(--line); border-radius:8px; padding:6px; }
+  .thumb { position:relative; cursor:pointer; border:2px solid transparent; border-radius:6px; overflow:hidden;
+           aspect-ratio:1; background:#000; }
+  .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+  .thumb.sel { border-color:var(--acc); }
+  .thumb .tag { position:absolute; bottom:0; left:0; right:0; font-size:9px; text-align:center;
+                background:rgba(0,0,0,.6); padding:1px; }
+  .thumb .tag.d { color:#ff8a8a; } .thumb .tag.n { color:#9be59b; }
+  .pager { display:flex; gap:8px; align-items:center; margin-top:8px; font-size:12px; color:var(--mut); }
+  .pipes { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; font-size:12px; max-height:200px; overflow-y:auto; }
+  .pipes label { display:flex; gap:5px; align-items:center; cursor:pointer; }
+  .canvas-wrap { position:relative; display:inline-block; max-width:100%; }
+  #imgCanvas { max-width:100%; border:1px solid var(--line); border-radius:8px; display:block; }
+  .legend { font-size:12px; color:var(--mut); margin-top:6px; display:flex; flex-wrap:wrap; gap:12px; }
+  .legend span { display:inline-flex; align-items:center; gap:5px; }
+  .sw { width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .grp { margin-bottom:16px; }
+  .grp h3 { font-size:13px; margin:0 0 8px; color:var(--acc); }
+  .bar-row { display:grid; grid-template-columns:120px 1fr; gap:8px; align-items:center; margin-bottom:6px; font-size:12px; }
+  .bars { display:flex; flex-direction:column; gap:3px; }
+  .bar { height:16px; background:#262b35; border-radius:4px; position:relative; overflow:hidden; }
+  .bar > div { height:100%; background:var(--acc); }
+  .bar > b { position:absolute; left:6px; top:0; line-height:16px; font-size:10px; color:#fff; font-weight:500; }
+  .pred { font-size:11px; color:var(--mut); }
+  .pred.dis { color:#ff8a8a; font-weight:600; }
+  table { border-collapse:collapse; width:100%; font-size:12px; }
+  th,td { border:1px solid var(--line); padding:4px 7px; text-align:center; }
+  th { color:var(--mut); font-weight:500; }
+  .gt { background:#10241a; border:1px solid #1f5; border-radius:8px; padding:8px 12px; margin-bottom:12px; font-size:13px; }
+  .muted { color:var(--mut); font-size:12px; }
+  .err { color:#ff8a8a; font-size:13px; }
+  .spinner { color:var(--acc); font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>무(Radish) 질병 baseline 데모</h1>
+  <p>이미지를 올리거나 valid 셋에서 골라, 12개 학습 파이프라인(분류 9 + detection 3)으로 동시 추론·비교</p>
+</header>
+
+<div class="wrap">
+  <!-- LEFT -->
+  <div class="col left">
+    <div class="sec">
+      <h2>1. 이미지 입력</h2>
+      <input type="file" id="fileInput" accept="image/*">
+      <div class="muted" style="margin-top:6px">또는 아래 valid 갤러리에서 선택</div>
+    </div>
+
+    <div class="sec">
+      <h2>2. Valid 갤러리</h2>
+      <div style="margin-bottom:8px">
+        <label class="muted">klass
+          <select id="klassFilter">
+            <option value="">all</option>
+            <option value="normal">normal</option>
+            <option value="disease_3">disease_3</option>
+            <option value="disease_4">disease_4</option>
+          </select>
+        </label>
+      </div>
+      <div class="gallery" id="gallery"></div>
+      <div class="pager">
+        <button class="secondary" id="prevBtn">‹ prev</button>
+        <span id="pageInfo">-</span>
+        <button class="secondary" id="nextBtn">next ›</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2>3. 파이프라인 선택</h2>
+      <div style="margin-bottom:6px">
+        <button class="secondary" id="selAll">전체</button>
+        <button class="secondary" id="selNone">해제</button>
+      </div>
+      <div class="pipes" id="pipes"></div>
+    </div>
+
+    <button id="predictBtn">Predict</button>
+    <div id="status" style="margin-top:8px"></div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="col right">
+    <h2>결과 비교</h2>
+    <div id="gtBox"></div>
+    <div class="canvas-wrap"><canvas id="imgCanvas"></canvas></div>
+    <div class="legend" id="legend"></div>
+    <div id="clsResult" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<script>
+const DET_COLORS = ["#ff5d5d","#ffb13d","#3dffb1","#9d6dff","#3dd1ff"];
+let PIPELINES = [];
+let selectedValidId = null;
+let selectedFile = null;
+let currentImg = new Image();   // displayed image (for canvas)
+let imgNatural = {w:0,h:0};
+let lastDetection = [];
+let lastGtBox = null;
+let page = { offset:0, limit:16, total:0 };
+
+const $ = s => document.querySelector(s);
+
+async function loadPipelines(){
+  PIPELINES = await (await fetch("/api/pipelines")).json();
+  const cls = PIPELINES.filter(p=>p.task==="classification");
+  const det = PIPELINES.filter(p=>p.task==="detection");
+  const box = $("#pipes");
+  box.innerHTML = "";
+  const mk = (p, label) => {
+    const l = document.createElement("label");
+    l.innerHTML = `<input type="checkbox" class="pchk" value="${p.id}" checked> ${label}`;
+    box.appendChild(l);
+  };
+  cls.forEach(p=>mk(p, `${p.arch} · ${p.setting}`));
+  det.forEach(p=>mk(p, `[DET] ${p.arch}`));
+}
+
+async function loadGallery(){
+  const klass = $("#klassFilter").value;
+  const url = `/api/valid-images?limit=${page.limit}&offset=${page.offset}` + (klass?`&klass=${klass}`:"");
+  const data = await (await fetch(url)).json();
+  page.total = data.total;
+  const g = $("#gallery");
+  g.innerHTML = "";
+  data.items.forEach(it=>{
+    const d = document.createElement("div");
+    d.className = "thumb" + (it.id===selectedValidId?" sel":"");
+    const isD = it.true_klass!=="normal";
+    d.innerHTML = `<img loading="lazy" src="/api/valid-images/${it.id}/raw">
+      <div class="tag ${isD?'d':'n'}">${it.true_klass.replace('disease_','d')}</div>`;
+    d.onclick = ()=>{ selectImage(it.id); };
+    g.appendChild(d);
+  });
+  const from = page.total===0?0:page.offset+1;
+  const to = Math.min(page.offset+page.limit, page.total);
+  $("#pageInfo").textContent = `${from}-${to} / ${page.total}`;
+  $("#prevBtn").disabled = page.offset<=0;
+  $("#nextBtn").disabled = page.offset+page.limit>=page.total;
+}
+
+function selectImage(id){
+  selectedValidId = id;
+  selectedFile = null;
+  $("#fileInput").value = "";
+  document.querySelectorAll(".thumb").forEach(t=>t.classList.remove("sel"));
+  loadGallery();
+  // preview on canvas
+  currentImg = new Image();
+  currentImg.onload = ()=>{ imgNatural={w:currentImg.naturalWidth,h:currentImg.naturalHeight};
+                            lastDetection=[]; lastGtBox=null; drawCanvas(); };
+  currentImg.src = `/api/valid-images/${id}/raw`;
+  $("#gtBox").innerHTML = "";
+  $("#clsResult").innerHTML = "";
+}
+
+$("#fileInput").onchange = e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  selectedFile = f; selectedValidId = null;
+  document.querySelectorAll(".thumb").forEach(t=>t.classList.remove("sel"));
+  currentImg = new Image();
+  currentImg.onload = ()=>{ imgNatural={w:currentImg.naturalWidth,h:currentImg.naturalHeight};
+                            lastDetection=[]; lastGtBox=null; drawCanvas(); };
+  currentImg.src = URL.createObjectURL(f);
+  $("#gtBox").innerHTML=""; $("#clsResult").innerHTML="";
+};
+
+function drawCanvas(){
+  const cv = $("#imgCanvas");
+  if(!currentImg.naturalWidth){ return; }
+  const maxW = 640;
+  const scale = Math.min(1, maxW/imgNatural.w);
+  cv.width = imgNatural.w*scale;
+  cv.height = imgNatural.h*scale;
+  const ctx = cv.getContext("2d");
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.drawImage(currentImg,0,0,cv.width,cv.height);
+  // GT box (green dashed)
+  if(lastGtBox){
+    ctx.save(); ctx.strokeStyle="#39ff88"; ctx.lineWidth=2; ctx.setLineDash([8,5]);
+    const [x0,y0,x1,y1]=lastGtBox.map((v,i)=>v*scale);
+    ctx.strokeRect(x0,y0,x1-x0,y1-y0);
+    ctx.setLineDash([]); ctx.fillStyle="#39ff88"; ctx.font="13px sans-serif";
+    ctx.fillText("GT", x0+3, y0+14); ctx.restore();
+  }
+  // detection boxes
+  lastDetection.forEach((d,i)=>{
+    const col = DET_COLORS[i%DET_COLORS.length];
+    const [x0,y0,x1,y1]=d.box_xyxy.map(v=>v*scale);
+    ctx.save();
+    ctx.globalAlpha = d.is_disease?1.0:0.35;
+    ctx.strokeStyle=col; ctx.lineWidth=d.is_disease?3:1.5;
+    ctx.strokeRect(x0,y0,x1-x0,y1-y0);
+    ctx.fillStyle=col; ctx.font="12px sans-serif";
+    ctx.fillText(`${d.arch} ${d.objectness.toFixed(2)}`, x0+3, Math.max(12,y0-4));
+    ctx.restore();
+  });
+}
+
+function renderLegend(){
+  const lg = $("#legend"); lg.innerHTML="";
+  if(lastGtBox){ lg.innerHTML += `<span><span class="sw" style="background:#39ff88"></span>Ground Truth box</span>`; }
+  lastDetection.forEach((d,i)=>{
+    const col = DET_COLORS[i%DET_COLORS.length];
+    lg.innerHTML += `<span><span class="sw" style="background:${col};opacity:${d.is_disease?1:0.4}"></span>`+
+      `${d.arch} obj=${d.objectness.toFixed(3)} ${d.is_disease?'질병':'정상'}</span>`;
+  });
+}
+
+function renderClassification(cls, gtKlass){
+  const groups = {};
+  cls.forEach(c=>{ (groups[c.setting]=groups[c.setting]||[]).push(c); });
+  const order = ["normal_vs_d3","normal_vs_d4","normal_d3_d4"];
+  const cont = $("#clsResult");
+  cont.innerHTML = "<h2>Classification (세팅별 백본 비교)</h2>";
+  order.filter(s=>groups[s]).forEach(setting=>{
+    const g = document.createElement("div"); g.className="grp";
+    g.innerHTML = `<h3>${setting}</h3>`;
+    groups[setting].forEach(c=>{
+      const bars = c.probs.map((p,i)=>{
+        const dis = i===c.pred_index && i>0;
+        return `<div class="bar"><div style="width:${(p*100).toFixed(1)}%;${dis?'background:#ff5d5d':''}"></div>`+
+               `<b>${c.class_names[i]} ${(p*100).toFixed(1)}%</b></div>`;
+      }).join("");
+      const isDis = c.pred_index>0;
+      g.innerHTML += `<div class="bar-row">
+          <div><b>${c.arch}</b><div class="pred ${isDis?'dis':''}">→ ${c.pred_class}</div></div>
+          <div class="bars">${bars}</div>
+        </div>`;
+    });
+    cont.appendChild(g);
+  });
+}
+
+async function predict(){
+  if(selectedValidId===null && !selectedFile){ setStatus("이미지를 선택/업로드하세요.","err"); return; }
+  const ids = [...document.querySelectorAll(".pchk:checked")].map(c=>c.value);
+  if(ids.length===0){ setStatus("파이프라인을 1개 이상 선택하세요.","err"); return; }
+  setStatus("추론 중...","spinner");
+  const fd = new FormData();
+  fd.append("pipelines", ids.join(","));
+  if(selectedFile){ fd.append("file", selectedFile); }
+  else { fd.append("valid_image_id", selectedValidId); }
+  let resp;
+  try { resp = await fetch("/api/predict",{method:"POST",body:fd}); }
+  catch(e){ setStatus("요청 실패: "+e,"err"); return; }
+  if(!resp.ok){ setStatus("오류: "+(await resp.text()),"err"); return; }
+  const data = await resp.json();
+  lastDetection = data.detection || [];
+  lastGtBox = data.input.ground_truth ? data.input.ground_truth.gt_box_xyxy : null;
+  // GT panel
+  const gt = data.input.ground_truth;
+  $("#gtBox").innerHTML = gt
+    ? `<div class="gt"><b>Ground Truth</b> &nbsp; 클래스: <b>${gt.true_klass}</b>`+
+      (gt.gt_box_xyxy?` &nbsp; GT box: [${gt.gt_box_xyxy.map(v=>v.toFixed(0)).join(", ")}]`:"")+`</div>`
+    : `<div class="muted" style="margin-bottom:10px">업로드 이미지 — ground truth 없음 (이미지 크기 ${data.input.width}×${data.input.height})</div>`;
+  drawCanvas();
+  renderLegend();
+  renderClassification(data.classification, gt?gt.true_klass:null);
+  setStatus(`완료 — 분류 ${data.classification.length}개 · detection ${data.detection.length}개`,"");
+}
+
+function setStatus(msg, cls){ const s=$("#status"); s.className=cls||""; s.textContent=msg; }
+
+$("#klassFilter").onchange = ()=>{ page.offset=0; loadGallery(); };
+$("#prevBtn").onclick = ()=>{ page.offset=Math.max(0,page.offset-page.limit); loadGallery(); };
+$("#nextBtn").onclick = ()=>{ page.offset+=page.limit; loadGallery(); };
+$("#selAll").onclick = ()=>document.querySelectorAll(".pchk").forEach(c=>c.checked=true);
+$("#selNone").onclick = ()=>document.querySelectorAll(".pchk").forEach(c=>c.checked=false);
+$("#predictBtn").onclick = predict;
+
+loadPipelines();
+loadGallery();
+</script>
+</body>
+</html>

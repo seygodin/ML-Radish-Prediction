@@ -1,0 +1,1689 @@
+{
+  "classification": {
+    "convnextv2_normal_vs_d3": {
+      "arch": "convnextv2",
+      "setting": "normal_vs_d3",
+      "prauc": 0.7873470620825563,
+      "prauc_per": {
+        "disease_3": 0.7873470620825563
+      },
+      "macro_f1": 0.4363996758791455,
+      "f1_per": [
+        0.6791687785098834,
+        0.19363057324840763
+      ],
+      "recall_per": {
+        "disease_3": 1.0
+      },
+      "prec_per": {
+        "disease_3": 0.1071932299012694
+      },
+      "recall_disease": 1.0,
+      "precision_disease": 0.1071932299012694,
+      "recall_ci": null,
+      "accuracy": 0.5409717186366932,
+      "n_dis": 76,
+      "n_valid": 1379,
+      "reported": {
+        "epoch": 5,
+        "pr_auc": 0.7874023370324406,
+        "macro_f1": 0.4363996758791455,
+        "recall_disease": 1.0,
+        "precision_disease": 0.1071932299012694,
+        "accuracy": 0.5409717186366932,
+        "confusion": [
+          [
+            670,
+            633
+          ],
+          [
+            0,
+            76
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "dist_match": true,
+      "recall_macro": 0.7570990023023791,
+      "precision_macro": 0.5535966149506347,
+      "f1_macro_recomp": 0.4363996758791455,
+      "auroc": 0.9625913882942199,
+      "train_loss": 0.23700927204274116,
+      "val_loss": 1.178513951021489,
+      "best_epoch": 5,
+      "params_m": 28.26,
+      "is_new": false
+    },
+    "convnextv2_normal_vs_d4": {
+      "arch": "convnextv2",
+      "setting": "normal_vs_d4",
+      "prauc": 0.7591709696060346,
+      "prauc_per": {
+        "disease_4": 0.7591709696060346
+      },
+      "macro_f1": 0.5868343268959333,
+      "f1_per": [
+        0.9389747762408461,
+        0.23469387755102042
+      ],
+      "recall_per": {
+        "disease_4": 0.9583333333333334
+      },
+      "prec_per": {
+        "disease_4": 0.13372093023255813
+      },
+      "recall_disease": 0.9583333333333334,
+      "precision_disease": 0.13372093023255813,
+      "recall_ci": null,
+      "accuracy": 0.8869630746043707,
+      "n_dis": 24,
+      "n_valid": 1327,
+      "reported": {
+        "epoch": 31,
+        "pr_auc": 0.7588015842632447,
+        "macro_f1": 0.5868343268959333,
+        "recall_disease": 0.9583333333333334,
+        "precision_disease": 0.13372093023255813,
+        "accuracy": 0.8869630746043707,
+        "confusion": [
+          [
+            1154,
+            149
+          ],
+          [
+            1,
+            23
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.921990918393451,
+      "precision_macro": 0.5664275646833786,
+      "f1_macro_recomp": 0.5868343268959333,
+      "auroc": 0.9845069071373753,
+      "train_loss": 0.13593624655305026,
+      "val_loss": 0.23934583605099372,
+      "best_epoch": 31,
+      "params_m": 28.26,
+      "is_new": false
+    },
+    "convnextv2_normal_d3_d4": {
+      "arch": "convnextv2",
+      "setting": "normal_d3_d4",
+      "prauc": 0.3427667964313236,
+      "prauc_per": {
+        "disease_3": 0.5355998616670287,
+        "disease_4": 0.14993373119561842
+      },
+      "macro_f1": 0.5227145372785471,
+      "f1_per": [
+        0.9424083769633508,
+        0.46700507614213205,
+        0.15873015873015872
+      ],
+      "recall_per": {
+        "disease_3": 0.6052631578947368,
+        "disease_4": 0.4166666666666667
+      },
+      "prec_per": {
+        "disease_3": 0.38016528925619836,
+        "disease_4": 0.09803921568627451
+      },
+      "recall_disease": 0.9,
+      "precision_disease": 0.40358744394618834,
+      "recall_ci": null,
+      "accuracy": 0.8738417676407698,
+      "n_dis": 100,
+      "n_valid": 1403,
+      "reported": {
+        "epoch": 19,
+        "pr_auc": 0.34276679643132363,
+        "macro_f1": 0.5227145372785471,
+        "recall_disease": 0.9,
+        "precision_disease": 0.40358744394618834,
+        "accuracy": 0.8738417676407698,
+        "confusion": [
+          [
+            1170,
+            64,
+            69
+          ],
+          [
+            7,
+            46,
+            23
+          ],
+          [
+            3,
+            11,
+            10
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.6399525611162724,
+      "precision_macro": 0.4899099762237622,
+      "f1_macro_recomp": 0.5227145372785471,
+      "auroc": 0.9425233618318419,
+      "train_loss": 0.5876264065372786,
+      "val_loss": 0.3362860994005917,
+      "best_epoch": 19,
+      "params_m": 28.26,
+      "is_new": false
+    },
+    "efficientnetv2_normal_vs_d3": {
+      "arch": "efficientnetv2",
+      "setting": "normal_vs_d3",
+      "prauc": 0.9493156371765206,
+      "prauc_per": {
+        "disease_3": 0.9493156371765206
+      },
+      "macro_f1": 0.7992006386856733,
+      "f1_per": [
+        0.9654898849662832,
+        0.6329113924050633
+      ],
+      "recall_per": {
+        "disease_3": 0.9868421052631579
+      },
+      "prec_per": {
+        "disease_3": 0.4658385093167702
+      },
+      "recall_disease": 0.9868421052631579,
+      "precision_disease": 0.4658385093167702,
+      "recall_ci": null,
+      "accuracy": 0.9369108049311095,
+      "n_dis": 76,
+      "n_valid": 1379,
+      "reported": {
+        "epoch": 59,
+        "pr_auc": 0.9493271724436775,
+        "macro_f1": 0.7992006386856733,
+        "recall_disease": 0.9868421052631579,
+        "precision_disease": 0.4658385093167702,
+        "accuracy": 0.9369108049311095,
+        "confusion": [
+          [
+            1217,
+            86
+          ],
+          [
+            1,
+            75
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "dist_match": true,
+      "recall_macro": 0.9604202851718706,
+      "precision_macro": 0.7325087456271864,
+      "f1_macro_recomp": 0.7992006386856733,
+      "auroc": 0.995415438057923,
+      "train_loss": 0.017311472937147666,
+      "val_loss": 0.20106149550751554,
+      "best_epoch": 59,
+      "params_m": 20.84,
+      "is_new": false
+    },
+    "efficientnetv2_normal_vs_d4": {
+      "arch": "efficientnetv2",
+      "setting": "normal_vs_d4",
+      "prauc": 0.8618126073153809,
+      "prauc_per": {
+        "disease_4": 0.8618126073153809
+      },
+      "macro_f1": 0.6785286242509244,
+      "f1_per": [
+        0.9699604743083005,
+        0.3870967741935484
+      ],
+      "recall_per": {
+        "disease_4": 1.0
+      },
+      "prec_per": {
+        "disease_4": 0.24
+      },
+      "recall_disease": 1.0,
+      "precision_disease": 0.24,
+      "recall_ci": null,
+      "accuracy": 0.9427279577995479,
+      "n_dis": 24,
+      "n_valid": 1327,
+      "reported": {
+        "epoch": 34,
+        "pr_auc": 0.8595148131977336,
+        "macro_f1": 0.6785286242509243,
+        "recall_disease": 1.0,
+        "precision_disease": 0.24,
+        "accuracy": 0.9427279577995479,
+        "confusion": [
+          [
+            1227,
+            76
+          ],
+          [
+            0,
+            24
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.9708365310821182,
+      "precision_macro": 0.62,
+      "f1_macro_recomp": 0.6785286242509244,
+      "auroc": 0.9948356357124585,
+      "train_loss": 0.11635720283449484,
+      "val_loss": 0.11039512227173577,
+      "best_epoch": 34,
+      "params_m": 20.84,
+      "is_new": false
+    },
+    "efficientnetv2_normal_d3_d4": {
+      "arch": "efficientnetv2",
+      "setting": "normal_d3_d4",
+      "prauc": 0.5090010772407878,
+      "prauc_per": {
+        "disease_3": 0.6906680393239231,
+        "disease_4": 0.3273341151576525
+      },
+      "macro_f1": 0.5913253677784244,
+      "f1_per": [
+        0.9684542586750788,
+        0.5242718446601942,
+        0.28125000000000006
+      ],
+      "recall_per": {
+        "disease_3": 0.7105263157894737,
+        "disease_4": 0.375
+      },
+      "prec_per": {
+        "disease_3": 0.4153846153846154,
+        "disease_4": 0.225
+      },
+      "recall_disease": 0.95,
+      "precision_disease": 0.5588235294117647,
+      "recall_ci": null,
+      "accuracy": 0.9201710620099787,
+      "n_dis": 100,
+      "n_valid": 1403,
+      "reported": {
+        "epoch": 13,
+        "pr_auc": 0.5090010772407878,
+        "macro_f1": 0.5913253677784244,
+        "recall_disease": 0.95,
+        "precision_disease": 0.5588235294117647,
+        "accuracy": 0.9201710620099787,
+        "confusion": [
+          [
+            1228,
+            62,
+            13
+          ],
+          [
+            4,
+            54,
+            18
+          ],
+          [
+            1,
+            14,
+            9
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.6759889458873585,
+      "precision_macro": 0.545443155114688,
+      "f1_macro_recomp": 0.5913253677784244,
+      "auroc": 0.9773655984726201,
+      "train_loss": 0.580498407153131,
+      "val_loss": 0.23088282615434927,
+      "best_epoch": 13,
+      "params_m": 20.84,
+      "is_new": false
+    },
+    "nextvit_normal_vs_d3": {
+      "arch": "nextvit",
+      "setting": "normal_vs_d3",
+      "prauc": 0.9292980939513675,
+      "prauc_per": {
+        "disease_3": 0.9292980939513675
+      },
+      "macro_f1": 0.8007466498205621,
+      "f1_per": [
+        0.9659000793021412,
+        0.635593220338983
+      ],
+      "recall_per": {
+        "disease_3": 0.9868421052631579
+      },
+      "prec_per": {
+        "disease_3": 0.46875
+      },
+      "recall_disease": 0.9868421052631579,
+      "precision_disease": 0.46875,
+      "recall_ci": null,
+      "accuracy": 0.9376359680928209,
+      "n_dis": 76,
+      "n_valid": 1379,
+      "reported": {
+        "epoch": 47,
+        "pr_auc": 0.9292842227867449,
+        "macro_f1": 0.8007466498205621,
+        "recall_disease": 0.9868421052631579,
+        "precision_disease": 0.46875,
+        "accuracy": 0.9376359680928209,
+        "confusion": [
+          [
+            1218,
+            85
+          ],
+          [
+            1,
+            75
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "dist_match": true,
+      "recall_macro": 0.9608040150260533,
+      "precision_macro": 0.7339648277276456,
+      "f1_macro_recomp": 0.8007466498205621,
+      "auroc": 0.9944864078846387,
+      "train_loss": 0.023509293263579936,
+      "val_loss": 0.1541427936650775,
+      "best_epoch": 47,
+      "params_m": 31.27,
+      "is_new": false
+    },
+    "nextvit_normal_vs_d4": {
+      "arch": "nextvit",
+      "setting": "normal_vs_d4",
+      "prauc": 0.8221776723781568,
+      "prauc_per": {
+        "disease_4": 0.8221776723781568
+      },
+      "macro_f1": 0.6313430505909465,
+      "f1_per": [
+        0.958050339592489,
+        0.304635761589404
+      ],
+      "recall_per": {
+        "disease_4": 0.9583333333333334
+      },
+      "prec_per": {
+        "disease_4": 0.18110236220472442
+      },
+      "recall_disease": 0.9583333333333334,
+      "precision_disease": 0.18110236220472442,
+      "recall_ci": null,
+      "accuracy": 0.9208741522230596,
+      "n_dis": 24,
+      "n_valid": 1327,
+      "reported": {
+        "epoch": 32,
+        "pr_auc": 0.8221776723781565,
+        "macro_f1": 0.6313430505909465,
+        "recall_disease": 0.9583333333333334,
+        "precision_disease": 0.18110236220472442,
+        "accuracy": 0.9208741522230596,
+        "confusion": [
+          [
+            1199,
+            104
+          ],
+          [
+            1,
+            23
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.9392587618316706,
+      "precision_macro": 0.5901345144356955,
+      "f1_macro_recomp": 0.6313430505909465,
+      "auroc": 0.9898631363520082,
+      "train_loss": 0.11444941069520517,
+      "val_loss": 0.20223690447002401,
+      "best_epoch": 32,
+      "params_m": 31.27,
+      "is_new": false
+    },
+    "nextvit_normal_d3_d4": {
+      "arch": "nextvit",
+      "setting": "normal_d3_d4",
+      "prauc": 0.4871606190784024,
+      "prauc_per": {
+        "disease_3": 0.7454716684514701,
+        "disease_4": 0.2288495697053348
+      },
+      "macro_f1": 0.6244674500619262,
+      "f1_per": [
+        0.983969465648855,
+        0.5736434108527132,
+        0.3157894736842105
+      ],
+      "recall_per": {
+        "disease_3": 0.4868421052631579,
+        "disease_4": 0.375
+      },
+      "prec_per": {
+        "disease_3": 0.6981132075471698,
+        "disease_4": 0.2727272727272727
+      },
+      "recall_disease": 0.72,
+      "precision_disease": 0.8372093023255814,
+      "recall_ci": null,
+      "accuracy": 0.9515324305060584,
+      "n_dis": 100,
+      "n_valid": 1403,
+      "reported": {
+        "epoch": 26,
+        "pr_auc": 0.48716061907840236,
+        "macro_f1": 0.6244674500619262,
+        "recall_disease": 0.72,
+        "precision_disease": 0.8372093023255814,
+        "accuracy": 0.9515324305060584,
+        "confusion": [
+          [
+            1289,
+            8,
+            6
+          ],
+          [
+            21,
+            37,
+            18
+          ],
+          [
+            7,
+            8,
+            9
+          ]
+        ]
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.6170325564486812,
+      "precision_macro": 0.6498600132932019,
+      "f1_macro_recomp": 0.6244674500619262,
+      "auroc": 0.9694100335293238,
+      "train_loss": 0.4294619503787961,
+      "val_loss": 0.13120349966048006,
+      "best_epoch": 26,
+      "params_m": 31.27,
+      "is_new": false
+    },
+    "densenet121_normal_vs_d3": {
+      "arch": "densenet121",
+      "setting": "normal_vs_d3",
+      "prauc": 0.9574990136667612,
+      "prauc_per": {
+        "disease_3": 0.9574990136667612
+      },
+      "macro_f1": 0.8603517621545194,
+      "f1_per": [
+        0.9792401096748923,
+        0.7414634146341463
+      ],
+      "recall_per": {
+        "disease_3": 1.0
+      },
+      "prec_per": {
+        "disease_3": 0.5891472868217055
+      },
+      "recall_disease": 1.0,
+      "precision_disease": 0.5891472868217055,
+      "recall_ci": null,
+      "accuracy": 0.9615663524292966,
+      "n_dis": 76,
+      "n_valid": 1379,
+      "reported": {
+        "epoch": 44,
+        "pr_auc": 0.9574990136667616,
+        "macro_f1": 0.8603517621545194,
+        "recall_disease": 1.0,
+        "precision_disease": 0.5891472868217055,
+        "accuracy": 0.9615663524292966,
+        "confusion": [
+          [
+            1250,
+            53
+          ],
+          [
+            0,
+            76
+          ]
+        ],
+        "recall_macro": 0.9796623177283192,
+        "precision_macro": 0.7945736434108528,
+        "f1_macro": 0.8603517621545194,
+        "auroc": 0.9968140323948782,
+        "train_loss": 0.015367450707770408,
+        "val_loss": 0.12756305774153792,
+        "recall": 0.9796623177283192,
+        "precision": 0.7945736434108528,
+        "f1": 0.8603517621545194
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "dist_match": true,
+      "recall_macro": 0.9796623177283192,
+      "precision_macro": 0.7945736434108528,
+      "f1_macro_recomp": 0.8603517621545194,
+      "auroc": 0.9968140323948782,
+      "train_loss": 0.015367450707770408,
+      "val_loss": 0.12756305774153792,
+      "best_epoch": 44,
+      "params_m": 7.48,
+      "is_new": true
+    },
+    "densenet121_normal_vs_d4": {
+      "arch": "densenet121",
+      "setting": "normal_vs_d4",
+      "prauc": 0.8572317341373147,
+      "prauc_per": {
+        "disease_4": 0.8572317341373147
+      },
+      "macro_f1": 0.6651647321750415,
+      "f1_per": [
+        0.9666931007137193,
+        0.3636363636363636
+      ],
+      "recall_per": {
+        "disease_4": 1.0
+      },
+      "prec_per": {
+        "disease_4": 0.2222222222222222
+      },
+      "recall_disease": 1.0,
+      "precision_disease": 0.2222222222222222,
+      "recall_ci": null,
+      "accuracy": 0.9366993217784476,
+      "n_dis": 24,
+      "n_valid": 1327,
+      "reported": {
+        "epoch": 23,
+        "pr_auc": 0.8572317341373146,
+        "macro_f1": 0.6651647321750415,
+        "recall_disease": 1.0,
+        "precision_disease": 0.2222222222222222,
+        "accuracy": 0.9366993217784476,
+        "confusion": [
+          [
+            1219,
+            84
+          ],
+          [
+            0,
+            24
+          ]
+        ],
+        "recall_macro": 0.967766692248657,
+        "precision_macro": 0.6111111111111112,
+        "f1_macro": 0.6651647321750415,
+        "auroc": 0.9948196469685341,
+        "train_loss": 0.05230495688148532,
+        "val_loss": 0.1528750513178474,
+        "recall": 0.967766692248657,
+        "precision": 0.6111111111111112,
+        "f1": 0.6651647321750415
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.967766692248657,
+      "precision_macro": 0.6111111111111112,
+      "f1_macro_recomp": 0.6651647321750415,
+      "auroc": 0.9948196469685342,
+      "train_loss": 0.05230495688148532,
+      "val_loss": 0.1528750513178474,
+      "best_epoch": 23,
+      "params_m": 7.48,
+      "is_new": true
+    },
+    "densenet121_normal_d3_d4": {
+      "arch": "densenet121",
+      "setting": "normal_d3_d4",
+      "prauc": 0.5703236695150375,
+      "prauc_per": {
+        "disease_3": 0.7275710892102168,
+        "disease_4": 0.4130762498198583
+      },
+      "macro_f1": 0.7088683662256147,
+      "f1_per": [
+        0.973653165552497,
+        0.6931818181818182,
+        0.45977011494252873
+      ],
+      "recall_per": {
+        "disease_3": 0.8026315789473685,
+        "disease_4": 0.8333333333333334
+      },
+      "prec_per": {
+        "disease_3": 0.61,
+        "disease_4": 0.31746031746031744
+      },
+      "recall_disease": 0.98,
+      "precision_disease": 0.6012269938650306,
+      "recall_ci": null,
+      "accuracy": 0.940128296507484,
+      "n_dis": 100,
+      "n_valid": 1403,
+      "reported": {
+        "epoch": 42,
+        "pr_auc": 0.5703236695150375,
+        "macro_f1": 0.7088683662256147,
+        "recall_disease": 0.98,
+        "precision_disease": 0.6012269938650306,
+        "accuracy": 0.940128296507484,
+        "confusion": [
+          [
+            1238,
+            35,
+            30
+          ],
+          [
+            2,
+            61,
+            13
+          ],
+          [
+            0,
+            4,
+            20
+          ]
+        ],
+        "recall_macro": 0.8620266770789855,
+        "precision_macro": 0.6419491380781703,
+        "f1_macro": 0.7088683662256147,
+        "auroc": 0.9843626006601959,
+        "train_loss": 0.21627740494130115,
+        "val_loss": 0.1943273948331603,
+        "recall": 0.8620266770789855,
+        "precision": 0.6419491380781703,
+        "f1": 0.7088683662256147
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.8620266770789855,
+      "precision_macro": 0.6419491380781703,
+      "f1_macro_recomp": 0.7088683662256147,
+      "auroc": 0.9843626006601959,
+      "train_loss": 0.21627740494130115,
+      "val_loss": 0.1943273948331603,
+      "best_epoch": 42,
+      "params_m": 7.48,
+      "is_new": true
+    },
+    "resnet50_normal_vs_d3": {
+      "arch": "resnet50",
+      "setting": "normal_vs_d3",
+      "prauc": 0.9647252473488114,
+      "prauc_per": {
+        "disease_3": 0.9647252473488114
+      },
+      "macro_f1": 0.8486073198279921,
+      "f1_per": [
+        0.9768354927365528,
+        0.7203791469194314
+      ],
+      "recall_per": {
+        "disease_3": 1.0
+      },
+      "prec_per": {
+        "disease_3": 0.562962962962963
+      },
+      "recall_disease": 1.0,
+      "precision_disease": 0.562962962962963,
+      "recall_ci": null,
+      "accuracy": 0.9572153734590283,
+      "n_dis": 76,
+      "n_valid": 1379,
+      "reported": {
+        "epoch": 39,
+        "pr_auc": 0.9647252473488115,
+        "macro_f1": 0.848607319827992,
+        "recall_disease": 1.0,
+        "precision_disease": 0.562962962962963,
+        "accuracy": 0.9572153734590283,
+        "confusion": [
+          [
+            1244,
+            59
+          ],
+          [
+            0,
+            76
+          ]
+        ],
+        "recall_macro": 0.9773599386032233,
+        "precision_macro": 0.7814814814814814,
+        "f1_macro": 0.848607319827992,
+        "auroc": 0.9979298784182251,
+        "train_loss": 0.02453989678240837,
+        "val_loss": 0.11403423172784422,
+        "recall": 0.9773599386032233,
+        "precision": 0.7814814814814814,
+        "f1": 0.848607319827992
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "dist_match": true,
+      "recall_macro": 0.9773599386032233,
+      "precision_macro": 0.7814814814814814,
+      "f1_macro_recomp": 0.8486073198279921,
+      "auroc": 0.9979298784182251,
+      "train_loss": 0.02453989678240837,
+      "val_loss": 0.11403423172784422,
+      "best_epoch": 39,
+      "params_m": 24.56,
+      "is_new": true
+    },
+    "resnet50_normal_vs_d4": {
+      "arch": "resnet50",
+      "setting": "normal_vs_d4",
+      "prauc": 0.8667534213409784,
+      "prauc_per": {
+        "disease_4": 0.8667534213409784
+      },
+      "macro_f1": 0.6683811783313562,
+      "f1_per": [
+        0.9687623566627126,
+        0.368
+      ],
+      "recall_per": {
+        "disease_4": 0.9583333333333334
+      },
+      "prec_per": {
+        "disease_4": 0.22772277227722773
+      },
+      "recall_disease": 0.9583333333333334,
+      "precision_disease": 0.22772277227722773,
+      "recall_ci": null,
+      "accuracy": 0.9404672192916352,
+      "n_dis": 24,
+      "n_valid": 1327,
+      "reported": {
+        "epoch": 39,
+        "pr_auc": 0.8667534213409782,
+        "macro_f1": 0.6683811783313562,
+        "recall_disease": 0.9583333333333334,
+        "precision_disease": 0.22772277227722773,
+        "accuracy": 0.9404672192916352,
+        "confusion": [
+          [
+            1225,
+            78
+          ],
+          [
+            1,
+            23
+          ]
+        ],
+        "recall_macro": 0.9492357380404195,
+        "precision_macro": 0.6134535557960364,
+        "f1_macro": 0.6683811783313562,
+        "auroc": 0.9909183934510105,
+        "train_loss": 0.05753066571273468,
+        "val_loss": 0.14656689660321884,
+        "recall": 0.9492357380404195,
+        "precision": 0.6134535557960364,
+        "f1": 0.6683811783313562
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.9492357380404195,
+      "precision_macro": 0.6134535557960364,
+      "f1_macro_recomp": 0.6683811783313562,
+      "auroc": 0.9909183934510105,
+      "train_loss": 0.05753066571273468,
+      "val_loss": 0.14656689660321884,
+      "best_epoch": 39,
+      "params_m": 24.56,
+      "is_new": true
+    },
+    "resnet50_normal_d3_d4": {
+      "arch": "resnet50",
+      "setting": "normal_d3_d4",
+      "prauc": 0.5301620452602444,
+      "prauc_per": {
+        "disease_3": 0.75149607477471,
+        "disease_4": 0.3088280157457786
+      },
+      "macro_f1": 0.6846974735536168,
+      "f1_per": [
+        0.9813084112149533,
+        0.7065868263473054,
+        0.3661971830985916
+      ],
+      "recall_per": {
+        "disease_3": 0.7763157894736842,
+        "disease_4": 0.5416666666666666
+      },
+      "prec_per": {
+        "disease_3": 0.6483516483516484,
+        "disease_4": 0.2765957446808511
+      },
+      "recall_disease": 0.95,
+      "precision_disease": 0.6884057971014492,
+      "recall_ci": null,
+      "accuracy": 0.9493941553813258,
+      "n_dis": 100,
+      "n_valid": 1403,
+      "reported": {
+        "epoch": 41,
+        "pr_auc": 0.5301620452602445,
+        "macro_f1": 0.6846974735536168,
+        "recall_disease": 0.95,
+        "precision_disease": 0.6884057971014492,
+        "accuracy": 0.9493941553813258,
+        "confusion": [
+          [
+            1260,
+            23,
+            20
+          ],
+          [
+            3,
+            59,
+            14
+          ],
+          [
+            2,
+            9,
+            13
+          ]
+        ],
+        "recall_macro": 0.7616605628935474,
+        "precision_macro": 0.6403316079541796,
+        "f1_macro": 0.6846974735536168,
+        "auroc": 0.9827505177382306,
+        "train_loss": 0.31459693599727534,
+        "val_loss": 0.14606450991180653,
+        "recall": 0.7616605628935474,
+        "precision": 0.6403316079541796,
+        "f1": 0.6846974735536168
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.7616605628935474,
+      "precision_macro": 0.6403316079541796,
+      "f1_macro_recomp": 0.6846974735536168,
+      "auroc": 0.9827505177382306,
+      "train_loss": 0.31459693599727534,
+      "val_loss": 0.14606450991180653,
+      "best_epoch": 41,
+      "params_m": 24.56,
+      "is_new": true
+    },
+    "mamba_normal_vs_d3": {
+      "arch": "mamba",
+      "setting": "normal_vs_d3",
+      "prauc": 0.8775907834009345,
+      "prauc_per": {
+        "disease_3": 0.8775907834009345
+      },
+      "macro_f1": 0.7291547394681968,
+      "f1_per": [
+        0.9428455614106203,
+        0.5154639175257731
+      ],
+      "recall_per": {
+        "disease_3": 0.9868421052631579
+      },
+      "prec_per": {
+        "disease_3": 0.3488372093023256
+      },
+      "recall_disease": 0.9868421052631579,
+      "precision_disease": 0.3488372093023256,
+      "recall_ci": null,
+      "accuracy": 0.8977519941986947,
+      "n_dis": 76,
+      "n_valid": 1379,
+      "reported": {
+        "epoch": 39,
+        "pr_auc": 0.8775907834009347,
+        "macro_f1": 0.7291547394681966,
+        "recall_disease": 0.9868421052631579,
+        "precision_disease": 0.3488372093023256,
+        "accuracy": 0.8977519941986947,
+        "confusion": [
+          [
+            1163,
+            140
+          ],
+          [
+            1,
+            75
+          ]
+        ],
+        "recall_macro": 0.9396988730460072,
+        "precision_macro": 0.673989051386558,
+        "f1_macro": 0.7291547394681966,
+        "auroc": 0.9887001656097265,
+        "train_loss": 0.04471288232647992,
+        "val_loss": 0.2913803255497502,
+        "recall": 0.9396988730460072,
+        "precision": 0.673989051386558,
+        "f1": 0.7291547394681966
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76
+      },
+      "dist_match": true,
+      "recall_macro": 0.9396988730460072,
+      "precision_macro": 0.673989051386558,
+      "f1_macro_recomp": 0.7291547394681968,
+      "auroc": 0.9887001656097265,
+      "train_loss": 0.04471288232647992,
+      "val_loss": 0.2913803255497502,
+      "best_epoch": 39,
+      "params_m": 3.88,
+      "is_new": true
+    },
+    "mamba_normal_vs_d4": {
+      "arch": "mamba",
+      "setting": "normal_vs_d4",
+      "prauc": 0.6288720936655846,
+      "prauc_per": {
+        "disease_4": 0.6288720936655846
+      },
+      "macro_f1": 0.5486139882799591,
+      "f1_per": [
+        0.9118997912317328,
+        0.18532818532818532
+      ],
+      "recall_per": {
+        "disease_4": 1.0
+      },
+      "prec_per": {
+        "disease_4": 0.10212765957446808
+      },
+      "recall_disease": 1.0,
+      "precision_disease": 0.10212765957446808,
+      "recall_ci": null,
+      "accuracy": 0.8409947249434815,
+      "n_dis": 24,
+      "n_valid": 1327,
+      "reported": {
+        "epoch": 14,
+        "pr_auc": 0.6288720936655848,
+        "macro_f1": 0.5486139882799591,
+        "recall_disease": 1.0,
+        "precision_disease": 0.10212765957446808,
+        "accuracy": 0.8409947249434815,
+        "confusion": [
+          [
+            1092,
+            211
+          ],
+          [
+            0,
+            24
+          ]
+        ],
+        "recall_macro": 0.9190330007674596,
+        "precision_macro": 0.551063829787234,
+        "f1_macro": 0.5486139882799591,
+        "auroc": 0.976880276285495,
+        "train_loss": 0.35330887079764045,
+        "val_loss": 0.29875352821497425,
+        "recall": 0.9190330007674596,
+        "precision": 0.551063829787234,
+        "f1": 0.5486139882799591
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.9190330007674596,
+      "precision_macro": 0.551063829787234,
+      "f1_macro_recomp": 0.5486139882799591,
+      "auroc": 0.976880276285495,
+      "train_loss": 0.35330887079764045,
+      "val_loss": 0.29875352821497425,
+      "best_epoch": 14,
+      "params_m": 3.88,
+      "is_new": true
+    },
+    "mamba_normal_d3_d4": {
+      "arch": "mamba",
+      "setting": "normal_d3_d4",
+      "prauc": 0.35852208548898296,
+      "prauc_per": {
+        "disease_3": 0.5814643288215361,
+        "disease_4": 0.13557984215642982
+      },
+      "macro_f1": 0.5236864356182538,
+      "f1_per": [
+        0.9495192307692307,
+        0.46280991735537186,
+        0.15873015873015875
+      ],
+      "recall_per": {
+        "disease_3": 0.3684210526315789,
+        "disease_4": 0.625
+      },
+      "prec_per": {
+        "disease_3": 0.6222222222222222,
+        "disease_4": 0.09090909090909091
+      },
+      "recall_disease": 0.92,
+      "precision_disease": 0.4380952380952381,
+      "recall_ci": null,
+      "accuracy": 0.8752672843905915,
+      "n_dis": 100,
+      "n_valid": 1403,
+      "reported": {
+        "epoch": 4,
+        "pr_auc": 0.3585220854889829,
+        "macro_f1": 0.5236864356182537,
+        "recall_disease": 0.92,
+        "precision_disease": 0.4380952380952381,
+        "accuracy": 0.8752672843905915,
+        "confusion": [
+          [
+            1185,
+            10,
+            108
+          ],
+          [
+            6,
+            28,
+            42
+          ],
+          [
+            2,
+            7,
+            15
+          ]
+        ],
+        "recall_macro": 0.6342869356814907,
+        "precision_macro": 0.5688085097976129,
+        "f1_macro": 0.5236864356182537,
+        "auroc": 0.9472182123987097,
+        "train_loss": 0.736106182947733,
+        "val_loss": 0.3395087336504026,
+        "recall": 0.6342869356814907,
+        "precision": 0.5688085097976129,
+        "f1": 0.5236864356182537
+      },
+      "manifest_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "pred_dist": {
+        "0": 1303,
+        "1": 76,
+        "2": 24
+      },
+      "dist_match": true,
+      "recall_macro": 0.6342869356814907,
+      "precision_macro": 0.5688085097976129,
+      "f1_macro_recomp": 0.5236864356182538,
+      "auroc": 0.9472182123987096,
+      "train_loss": 0.736106182947733,
+      "val_loss": 0.3395087336504026,
+      "best_epoch": 4,
+      "params_m": 3.88,
+      "is_new": true
+    }
+  },
+  "detection": {
+    "convnextv2_detection_singlebox": {
+      "arch": "convnextv2",
+      "n": 1403,
+      "n_pos": 100,
+      "n_neg": 1303,
+      "det_pr_auc": 0.9977459361470546,
+      "det_roc_auc": 0.999823484267076,
+      "presence_recall": 0.99,
+      "fp_rate": 0.0030698388334612432,
+      "recall_ci": null,
+      "fp_ci": null,
+      "iou_presence": 0.7,
+      "iou_dist": {
+        "mean": 0.6199094665106331,
+        "median": 0.6669679882218131,
+        "p25": 0.44456369308720467,
+        "p75": 0.7813349785889637,
+        "min": 0.05435326112814645,
+        "max": 0.9898204269321701
+      },
+      "map05": 0.5990519660315872,
+      "sep": {
+        "pos_median": 0.9988947808742523,
+        "pos_p25": 0.9952574670314789,
+        "pos_min": 0.28547152876853943,
+        "neg_median": 1.221907587023452e-05,
+        "neg_p75": 5.104346382722724e-05,
+        "neg_p95": 0.0025945115135982406,
+        "neg_max": 0.9599877595901489,
+        "n_neg_ge_0p5": 4
+      },
+      "reported": {
+        "epoch": 37,
+        "det_pr_auc": 0.9977459361470546,
+        "det_roc_auc": 0.999823484267076,
+        "presence_recall_at_0.5": 0.99,
+        "fp_rate_at_0.5": 0.0030698388334612432,
+        "iou_at_0.5_presence": 0.7,
+        "iou_distribution": {
+          "mean": 0.6199094665106331,
+          "median": 0.6669679882218131,
+          "p25": 0.44456369308720467,
+          "p75": 0.7813349785889637,
+          "min": 0.05435326112814645,
+          "max": 0.9898204269321701
+        },
+        "map_at_0.5": 0.6025321579001308,
+        "n_positive": 100,
+        "n_negative": 1303,
+        "n_total": 1403
+      },
+      "meta": {
+        "train_counts": {
+          "disease_3": 470,
+          "disease_4": 227,
+          "normal": 697
+        },
+        "valid_counts": {
+          "disease_3": 76,
+          "disease_4": 24,
+          "normal": 1303
+        },
+        "include_normal": true
+      },
+      "elapsed": 1171.9100003242493,
+      "best_epoch": 37,
+      "train_loss": 1.1801372030803134,
+      "val_loss": 0.10423595010597157,
+      "params_m": 28.07,
+      "is_new": false
+    },
+    "efficientnetv2_detection_singlebox": {
+      "arch": "efficientnetv2",
+      "n": 1403,
+      "n_pos": 100,
+      "n_neg": 1303,
+      "det_pr_auc": 0.9990388345160821,
+      "det_roc_auc": 0.9999232540291635,
+      "presence_recall": 1.0,
+      "fp_rate": 0.005372217958557176,
+      "recall_ci": null,
+      "fp_ci": null,
+      "iou_presence": 0.64,
+      "iou_dist": {
+        "mean": 0.5736161191841095,
+        "median": 0.5763729499292816,
+        "p25": 0.4285171490217823,
+        "p75": 0.7559256573030884,
+        "min": 0.11137863242376325,
+        "max": 0.9935890624108854
+      },
+      "map05": 0.49400603717372105,
+      "sep": {
+        "pos_median": 0.9987081289291382,
+        "pos_p25": 0.994898334145546,
+        "pos_min": 0.6005398035049438,
+        "neg_median": 0.0020507434383034706,
+        "neg_p75": 0.0034096420276910067,
+        "neg_p95": 0.02354536335915326,
+        "neg_max": 0.9216402173042297,
+        "n_neg_ge_0p5": 7
+      },
+      "reported": {
+        "epoch": 41,
+        "det_pr_auc": 0.999038834516082,
+        "det_roc_auc": 0.9999232540291635,
+        "presence_recall_at_0.5": 1.0,
+        "fp_rate_at_0.5": 0.005372217958557176,
+        "iou_at_0.5_presence": 0.64,
+        "iou_distribution": {
+          "mean": 0.5736161191841095,
+          "median": 0.5763729499292816,
+          "p25": 0.4285171490217823,
+          "p75": 0.7559256573030884,
+          "min": 0.11137863242376325,
+          "max": 0.9935890624108854
+        },
+        "map_at_0.5": 0.4890033751734907,
+        "n_positive": 100,
+        "n_negative": 1303,
+        "n_total": 1403
+      },
+      "meta": {
+        "train_counts": {
+          "disease_3": 470,
+          "disease_4": 227,
+          "normal": 697
+        },
+        "valid_counts": {
+          "disease_3": 76,
+          "disease_4": 24,
+          "normal": 1303
+        },
+        "include_normal": true
+      },
+      "elapsed": 1325.7578530311584,
+      "best_epoch": 41,
+      "train_loss": 1.5043798688479832,
+      "val_loss": 0.12222951956518813,
+      "params_m": 20.51,
+      "is_new": false
+    },
+    "nextvit_detection_singlebox": {
+      "arch": "nextvit",
+      "n": 1403,
+      "n_pos": 100,
+      "n_neg": 1303,
+      "det_pr_auc": 0.9990430402930403,
+      "det_roc_auc": 0.9999232540291635,
+      "presence_recall": 1.0,
+      "fp_rate": 0.0061396776669224865,
+      "recall_ci": null,
+      "fp_ci": null,
+      "iou_presence": 0.59,
+      "iou_dist": {
+        "mean": 0.5700405380298114,
+        "median": 0.6058112515405848,
+        "p25": 0.41847495467013957,
+        "p75": 0.7463142327427172,
+        "min": 0.08944608193162766,
+        "max": 0.9940177000907137
+      },
+      "map05": 0.4590655930200821,
+      "sep": {
+        "pos_median": 0.9973694682121277,
+        "pos_p25": 0.9878697544336319,
+        "pos_min": 0.6255208849906921,
+        "neg_median": 0.002275221049785614,
+        "neg_p75": 0.0062299848068505526,
+        "neg_p95": 0.08362648114562013,
+        "neg_max": 0.7684189677238464,
+        "n_neg_ge_0p5": 8
+      },
+      "reported": {
+        "epoch": 59,
+        "det_pr_auc": 0.9990430402930403,
+        "det_roc_auc": 0.9999232540291635,
+        "presence_recall_at_0.5": 1.0,
+        "fp_rate_at_0.5": 0.0061396776669224865,
+        "iou_at_0.5_presence": 0.59,
+        "iou_distribution": {
+          "mean": 0.5700405380298114,
+          "median": 0.6058112515405848,
+          "p25": 0.41847495467013957,
+          "p75": 0.7463142327427172,
+          "min": 0.08944608193162766,
+          "max": 0.9940177000907137
+        },
+        "map_at_0.5": 0.45375611868541105,
+        "n_positive": 100,
+        "n_negative": 1303,
+        "n_total": 1403
+      },
+      "meta": {
+        "train_counts": {
+          "disease_3": 470,
+          "disease_4": 227,
+          "normal": 697
+        },
+        "valid_counts": {
+          "disease_3": 76,
+          "disease_4": 24,
+          "normal": 1303
+        },
+        "include_normal": true
+      },
+      "elapsed": 1105.3050973415375,
+      "best_epoch": 59,
+      "train_loss": 1.4323593063013895,
+      "val_loss": 0.13281917130190904,
+      "params_m": 31.0,
+      "is_new": false
+    },
+    "densenet121_detection_singlebox": {
+      "arch": "densenet121",
+      "n": 1403,
+      "n_pos": 100,
+      "n_neg": 1303,
+      "det_pr_auc": 0.9997039215686274,
+      "det_roc_auc": 0.999976976208749,
+      "presence_recall": 1.0,
+      "fp_rate": 0.0030698388334612432,
+      "recall_ci": null,
+      "fp_ci": null,
+      "iou_presence": 0.67,
+      "iou_dist": {
+        "mean": 0.603987706534776,
+        "median": 0.6214330622077193,
+        "p25": 0.42346940283949,
+        "p75": 0.7873272643803944,
+        "min": 0.07505729700989755,
+        "max": 0.9865379411089215
+      },
+      "map05": 0.588145280175586,
+      "sep": {
+        "pos_median": 0.999268651008606,
+        "pos_p25": 0.9957888275384903,
+        "pos_min": 0.5388011932373047,
+        "neg_median": 0.00010720880527514964,
+        "neg_p75": 0.0010005044750869274,
+        "neg_p95": 0.026292455010115946,
+        "neg_max": 0.9281486868858337,
+        "n_neg_ge_0p5": 4
+      },
+      "reported": {
+        "epoch": 45,
+        "det_pr_auc": 0.9997039215686274,
+        "det_roc_auc": 0.999976976208749,
+        "presence_recall_at_0.5": 1.0,
+        "fp_rate_at_0.5": 0.0030698388334612432,
+        "iou_at_0.5_presence": 0.67,
+        "iou_distribution": {
+          "mean": 0.603987706534776,
+          "median": 0.6214330622077193,
+          "p25": 0.42346940283949,
+          "p75": 0.7873272643803944,
+          "min": 0.07505729700989755,
+          "max": 0.9865379411089215
+        },
+        "map_at_0.5": 0.5843583474132847,
+        "n_positive": 100,
+        "n_negative": 1303,
+        "n_total": 1403
+      },
+      "meta": {
+        "train_counts": {
+          "disease_3": 470,
+          "disease_4": 227,
+          "normal": 697
+        },
+        "valid_counts": {
+          "disease_3": 76,
+          "disease_4": 24,
+          "normal": 1303
+        },
+        "include_normal": true
+      },
+      "elapsed": 1255.4631807804108,
+      "best_epoch": 45,
+      "train_loss": 1.2142009166308811,
+      "val_loss": 0.10858693687055733,
+      "params_m": 7.22,
+      "is_new": true
+    },
+    "resnet50_detection_singlebox": {
+      "arch": "resnet50",
+      "n": 1403,
+      "n_pos": 100,
+      "n_neg": 1303,
+      "det_pr_auc": 0.9984558413457022,
+      "det_roc_auc": 0.9998772064466616,
+      "presence_recall": 0.98,
+      "fp_rate": 0.0015349194167306216,
+      "recall_ci": null,
+      "fp_ci": null,
+      "iou_presence": 0.6,
+      "iou_dist": {
+        "mean": 0.5647609613189665,
+        "median": 0.565568764089775,
+        "p25": 0.425556754001491,
+        "p75": 0.7318057657833612,
+        "min": 0.1248176069395394,
+        "max": 0.9756041617472697
+      },
+      "map05": 0.49932347305646063,
+      "sep": {
+        "pos_median": 0.9993032217025757,
+        "pos_p25": 0.9893268048763275,
+        "pos_min": 0.14069005846977234,
+        "neg_median": 2.791126462398097e-06,
+        "neg_p75": 4.3320362237864174e-05,
+        "neg_p95": 0.004363631457090376,
+        "neg_max": 0.9068183302879333,
+        "n_neg_ge_0p5": 2
+      },
+      "reported": {
+        "epoch": 34,
+        "det_pr_auc": 0.9984558413457021,
+        "det_roc_auc": 0.9998772064466616,
+        "presence_recall_at_0.5": 0.98,
+        "fp_rate_at_0.5": 0.0015349194167306216,
+        "iou_at_0.5_presence": 0.6,
+        "iou_distribution": {
+          "mean": 0.5647609613189665,
+          "median": 0.565568764089775,
+          "p25": 0.425556754001491,
+          "p75": 0.7318057657833612,
+          "min": 0.1248176069395394,
+          "max": 0.9756041617472697
+        },
+        "map_at_0.5": 0.494819370066231,
+        "n_positive": 100,
+        "n_negative": 1303,
+        "n_total": 1403
+      },
+      "meta": {
+        "train_counts": {
+          "disease_3": 470,
+          "disease_4": 227,
+          "normal": 697
+        },
+        "valid_counts": {
+          "disease_3": 76,
+          "disease_4": 24,
+          "normal": 1303
+        },
+        "include_normal": true
+      },
+      "elapsed": 863.2428822517395,
+      "best_epoch": 34,
+      "train_loss": 1.3618617933137076,
+      "val_loss": 0.11774915579974608,
+      "params_m": 24.04,
+      "is_new": true
+    },
+    "mamba_detection_singlebox": {
+      "arch": "mamba",
+      "n": 1403,
+      "n_pos": 100,
+      "n_neg": 1303,
+      "det_pr_auc": 0.9975335877862596,
+      "det_roc_auc": 0.9997544128933231,
+      "presence_recall": 0.99,
+      "fp_rate": 0.004604758250191865,
+      "recall_ci": null,
+      "fp_ci": null,
+      "iou_presence": 0.63,
+      "iou_dist": {
+        "mean": 0.5825119486371999,
+        "median": 0.6411791679097238,
+        "p25": 0.4352166537803336,
+        "p75": 0.7276445088845775,
+        "min": 0.09860417731882612,
+        "max": 0.9920673997845249
+      },
+      "map05": 0.5242324350062249,
+      "sep": {
+        "pos_median": 0.9990170001983643,
+        "pos_p25": 0.9973633736371994,
+        "pos_min": 0.05552718788385391,
+        "neg_median": 3.5395109989622142e-06,
+        "neg_p75": 3.593484689190518e-05,
+        "neg_p95": 0.0036652676062658277,
+        "neg_max": 0.9552940726280212,
+        "n_neg_ge_0p5": 6
+      },
+      "reported": {
+        "epoch": 37,
+        "det_pr_auc": 0.9975335877862596,
+        "det_roc_auc": 0.9997544128933231,
+        "presence_recall_at_0.5": 0.99,
+        "fp_rate_at_0.5": 0.004604758250191865,
+        "iou_at_0.5_presence": 0.63,
+        "iou_distribution": {
+          "mean": 0.5825119486371999,
+          "median": 0.6411791679097238,
+          "p25": 0.4352166537803336,
+          "p75": 0.7276445088845775,
+          "min": 0.09860417731882612,
+          "max": 0.9920673997845249
+        },
+        "map_at_0.5": 0.5197894467406745,
+        "n_positive": 100,
+        "n_negative": 1303,
+        "n_total": 1403
+      },
+      "meta": {
+        "train_counts": {
+          "disease_3": 470,
+          "disease_4": 227,
+          "normal": 697
+        },
+        "valid_counts": {
+          "disease_3": 76,
+          "disease_4": 24,
+          "normal": 1303
+        },
+        "include_normal": true
+      },
+      "elapsed": 2424.3173105716705,
+      "best_epoch": 37,
+      "train_loss": 1.2761586446421487,
+      "val_loss": 0.1184479830015241,
+      "params_m": 4.03,
+      "is_new": true
+    }
+  }
+}

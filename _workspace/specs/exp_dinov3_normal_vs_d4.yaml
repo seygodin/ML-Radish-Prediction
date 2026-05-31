@@ -1,0 +1,57 @@
+# "Ours" spec. Self-contained: experiment-runner runs from this file alone.
+# DINOv3 ViT-S/16 (self-supervised pretrained, FROZEN) + 2-layer MLP head.
+# Only the head (~0.099M params) is trained; backbone (21.6M) is frozen.
+name: dinov3_normal_vs_d4
+task: classification
+model:
+  builder: src.models.build_classifier
+  arch: dinov3
+  num_classes: 2
+  img_size: 256
+  pretrained: true
+  frozen_backbone: true
+  source: timm  # vit_small_patch16_dinov3, feat dim 384
+data:
+  builder: build_classification_loaders
+  setting: normal_vs_d4
+  img_size: 256
+  batch_size: 64
+  num_workers: 8
+optim:
+  name: adamw
+  lr: 0.001          # head-only -> larger lr; frozen features converge fast
+  wd: 0.05
+  epochs: 30         # fewer epochs: probe over frozen features converges quickly
+  sched: cosine
+  warmup_epochs: 3
+loss:
+  type: cross_entropy
+  class_weights: from_meta
+  label_smoothing: 0.0
+eval:
+  metrics:
+  - pr_auc
+  - macro_f1
+  - recall_disease
+  - precision_disease
+  - confusion
+  - accuracy
+  - auroc
+  primary: pr_auc
+  primary_3class_note: for normal_d3_d4 use macro PR-AUC (one-vs-rest) as primary
+  threshold_policy: argmax for prediction; PR-AUC swept over disease score
+early_stop:
+  monitor: val_pr_auc
+  mode: max
+  patience: 10
+class_names:
+- normal
+- disease_4
+seed: 42
+packages:
+- torch
+- torchvision
+- timm
+- scikit-learn
+- pyyaml
+smoke: true

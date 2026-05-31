@@ -1,0 +1,109 @@
+{
+  "name": "dinov3_base_focalg3_normal_d3_d4",
+  "task": "classification",
+  "spec_path": "/home/seungeon/Workspace/side/radish/_workspace/specs/exp_dinov3_base_focalg3_normal_d3_d4.yaml",
+  "spec": {
+    "name": "dinov3_base_focalg3_normal_d3_d4",
+    "task": "classification",
+    "model": {
+      "builder": "src.models.build_classifier",
+      "arch": "dinov3_base",
+      "num_classes": 3,
+      "img_size": 512,
+      "pretrained": true,
+      "frozen_backbone": true,
+      "head_hidden": 512,
+      "source": "timm"
+    },
+    "data": {
+      "builder": "build_classification_loaders",
+      "setting": "normal_d3_d4",
+      "img_size": 512,
+      "batch_size": 64,
+      "num_workers": 8,
+      "aug": "strong"
+    },
+    "optim": {
+      "name": "adamw",
+      "lr": 0.001,
+      "wd": 0.05,
+      "epochs": 40,
+      "sched": "cosine",
+      "warmup_epochs": 3
+    },
+    "loss": {
+      "type": "focal",
+      "gamma": 3.0,
+      "class_weights": "from_meta",
+      "label_smoothing": 0.0
+    },
+    "eval": {
+      "metrics": [
+        "pr_auc",
+        "macro_f1",
+        "recall_disease",
+        "precision_disease",
+        "confusion",
+        "accuracy",
+        "auroc"
+      ],
+      "primary": "pr_auc",
+      "primary_3class_note": "for normal_d3_d4 use macro PR-AUC (one-vs-rest) as primary",
+      "threshold_policy": "argmax for prediction; PR-AUC swept over disease score"
+    },
+    "early_stop": {
+      "monitor": "val_pr_auc",
+      "mode": "max",
+      "patience": 10
+    },
+    "class_names": [
+      "normal",
+      "disease_3",
+      "disease_4"
+    ],
+    "seed": 42,
+    "packages": [
+      "torch",
+      "torchvision",
+      "timm",
+      "scikit-learn",
+      "pyyaml"
+    ],
+    "smoke": true
+  },
+  "command": "python -m src.train --spec _workspace/specs/exp_dinov3_base_focalg3_normal_d3_d4.yaml --device cuda:3",
+  "seed": 42,
+  "device": "cuda:3",
+  "gpu_name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+  "smoke": false,
+  "package_versions": {
+    "torch": "2.11.0+cu128",
+    "torchvision": "0.26.0+cu128",
+    "timm": "1.0.27",
+    "scikit-learn": "1.7.2",
+    "pyyaml": "6.0.3"
+  },
+  "torch": "2.11.0+cu128",
+  "python": "3.10.20",
+  "git_head": "not-a-git-repo",
+  "cudnn": {
+    "benchmark": true,
+    "deterministic": false
+  },
+  "adjustments": [],
+  "loss": {
+    "type": "focal",
+    "gamma": 3.0,
+    "class_weights_used": true,
+    "class_weights": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "label_smoothing": 0.0
+  },
+  "trainable_params": {
+    "trainable": 395267,
+    "total": 86036483
+  }
+}
