@@ -115,6 +115,30 @@
     <div class="canvas-wrap"><canvas id="imgCanvas"></canvas></div>
     <div class="legend" id="legend"></div>
     <div id="clsResult" style="margin-top:16px"></div>
+
+    <div class="sec vqa" style="margin-top:22px; border-top:1px solid var(--line); padding-top:16px">
+      <h2>VQA — 음성/텍스트 질의응답 (SmolVLM + whisper)</h2>
+      <p class="muted" style="margin:0 0 10px">현재 선택/업로드한 이미지에 대해 질문합니다. 마이크로 말하거나, 오디오 파일을 올리거나, 텍스트로 입력하세요.</p>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
+        <button class="secondary" id="recBtn">● 녹음 시작</button>
+        <span id="recState" class="muted"></span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
+        <label class="muted" style="font-size:12px">오디오 파일:</label>
+        <input type="file" id="vqaAudioFile" accept="audio/*,.wav,.mp3,.ogg,.flac"
+               style="font-size:12px; color:var(--fg)">
+        <button class="secondary" id="vqaAudioClear" type="button" style="font-size:12px">지우기</button>
+        <span class="muted" style="font-size:11px">(wav·mp3·ogg·flac 지원, m4a·webm 미지원)</span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px">
+        <input type="text" id="vqaText" placeholder="텍스트 질문 (예: Is this radish leaf diseased?)"
+               style="flex:1; background:#0f1218; color:var(--fg); border:1px solid var(--line);
+                      border-radius:6px; padding:8px 10px; font-size:13px">
+        <button id="askBtn">Ask</button>
+      </div>
+      <div id="vqaStatus" class="muted" style="margin-bottom:8px"></div>
+      <div id="vqaResult"></div>
+    </div>
   </div>
 </div>
 
@@ -299,6 +323,114 @@ $("#nextBtn").onclick = ()=>{ page.offset+=page.limit; loadGallery(); };
 $("#selAll").onclick = ()=>document.querySelectorAll(".pchk").forEach(c=>c.checked=true);
 $("#selNone").onclick = ()=>document.querySelectorAll(".pchk").forEach(c=>c.checked=false);
 $("#predictBtn").onclick = predict;
+
+// ---------------------------------------------------------------------------
+// VQA: mic recording (WebAudio PCM -> WAV) + text fallback
+// ---------------------------------------------------------------------------
+let recState = { ctx:null, stream:null, node:null, src:null, chunks:[], sr:16000, recording:false };
+
+function floatTo16BitPCM(view, offset, input){
+  for(let i=0;i<input.length;i++,offset+=2){
+    let s = Math.max(-1, Math.min(1, input[i]));
+    view.setInt16(offset, s<0 ? s*0x8000 : s*0x7FFF, true);
+  }
+}
+function encodeWAV(samples, sampleRate){
+  const buffer = new ArrayBuffer(44 + samples.length*2);
+  const view = new DataView(buffer);
+  const ws = (off,str)=>{ for(let i=0;i<str.length;i++) view.setUint8(off+i, str.charCodeAt(i)); };
+  ws(0,"RIFF"); view.setUint32(4, 36+samples.length*2, true); ws(8,"WAVE");
+  ws(12,"fmt "); view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,1,true);
+  view.setUint32(24,sampleRate,true); view.setUint32(28,sampleRate*2,true);
+  view.setUint16(32,2,true); view.setUint16(34,16,true);
+  ws(36,"data"); view.setUint32(40, samples.length*2, true);
+  floatTo16BitPCM(view, 44, samples);
+  return new Blob([view], {type:"audio/wav"});
+}
+function flattenChunks(chunks){
+  let len = chunks.reduce((a,c)=>a+c.length,0);
+  const out = new Float32Array(len); let off=0;
+  chunks.forEach(c=>{ out.set(c,off); off+=c.length; });
+  return out;
+}
+// simple linear resample to 16k
+function resampleTo16k(samples, srcRate){
+  if(srcRate===16000) return samples;
+  const ratio = srcRate/16000;
+  const newLen = Math.round(samples.length/ratio);
+  const out = new Float32Array(newLen);
+  for(let i=0;i<newLen;i++){
+    const idx = i*ratio; const i0 = Math.floor(idx); const i1 = Math.min(i0+1, samples.length-1);
+    const frac = idx-i0; out[i] = samples[i0]*(1-frac)+samples[i1]*frac;
+  }
+  return out;
+}
+
+async function startRec(){
+  try {
+    recState.stream = await navigator.mediaDevices.getUserMedia({audio:true});
+  } catch(e){
+    setVqaStatus("마이크 권한이 거부되었습니다. 아래 텍스트 질문을 사용하세요.","err"); return;
+  }
+  recState.ctx = new (window.AudioContext||window.webkitAudioContext)();
+  recState.sr = recState.ctx.sampleRate;
+  recState.src = recState.ctx.createMediaStreamSource(recState.stream);
+  recState.node = recState.ctx.createScriptProcessor(4096,1,1);
+  recState.chunks = [];
+  recState.node.onaudioprocess = e=>{
+    recState.chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+  };
+  recState.src.connect(recState.node); recState.node.connect(recState.ctx.destination);
+  recState.recording = true;
+  $("#recBtn").textContent = "■ 녹음 중지";
+  $("#recState").textContent = "녹음 중...";
+}
+async function stopRec(){
+  recState.recording = false;
+  $("#recBtn").textContent = "● 녹음 시작";
+  $("#recState").textContent = "처리 중...";
+  try { recState.node.disconnect(); recState.src.disconnect(); } catch(e){}
+  try { recState.stream.getTracks().forEach(t=>t.stop()); } catch(e){}
+  const raw = flattenChunks(recState.chunks);
+  await recState.ctx.close();
+  const samples = resampleTo16k(raw, recState.sr);
+  const wav = encodeWAV(samples, 16000);
+  $("#recState").textContent = "녹음 완료, 질의 중...";
+  await askVqa(wav);
+}
+$("#recBtn").onclick = ()=>{ recState.recording ? stopRec() : startRec(); };
+$("#askBtn").onclick = ()=>{ askVqa(null); };
+$("#vqaAudioClear").onclick = ()=>{ $("#vqaAudioFile").value=""; setVqaStatus("오디오 파일 선택 해제","" ); };
+
+function setVqaStatus(msg, cls){ const s=$("#vqaStatus"); s.className=(cls||"")+" muted"; s.textContent=msg; }
+
+async function askVqa(wavBlob){
+  if(selectedValidId===null && !selectedFile){ setVqaStatus("먼저 이미지를 선택/업로드하세요.","err"); return; }
+  const txt = $("#vqaText").value.trim();
+  // 오디오: 업로드한 파일이 있으면 우선, 없으면 녹음한 wav
+  const upEl = $("#vqaAudioFile");
+  const audioBlob = (upEl && upEl.files && upEl.files.length) ? upEl.files[0] : wavBlob;
+  if(!audioBlob && !txt){ setVqaStatus("질문을 말하거나, 오디오 파일을 올리거나, 텍스트로 입력하세요.","err"); return; }
+  setVqaStatus("질의 중... (모델 최초 로드 시 수십 초 걸릴 수 있음)","spinner");
+  const fd = new FormData();
+  if(selectedFile){ fd.append("file", selectedFile); }
+  else { fd.append("valid_image_id", selectedValidId); }
+  if(audioBlob){ fd.append("audio", audioBlob, audioBlob.name || "q.wav"); }
+  if(txt){ fd.append("question", txt); }
+  let resp;
+  try { resp = await fetch("/api/vqa",{method:"POST",body:fd}); }
+  catch(e){ setVqaStatus("요청 실패: "+e,"err"); return; }
+  if(!resp.ok){ setVqaStatus("오류: "+(await resp.text()),"err"); return; }
+  const data = await resp.json();
+  $("#recState").textContent = "";
+  setVqaStatus("완료","");
+  const tr = data.transcript ? `<div class="muted" style="margin-bottom:6px">인식된 질문(STT): <i>${data.transcript}</i></div>` : "";
+  $("#vqaResult").innerHTML =
+    `<div class="gt" style="background:#10202e; border-color:#235">`+
+    tr +
+    `<div style="margin-bottom:6px"><b>질문</b>: ${data.question || "(없음)"}</div>`+
+    `<div><b>답변</b>: ${data.answer}</div></div>`;
+}
 
 loadPipelines();
 loadGallery();

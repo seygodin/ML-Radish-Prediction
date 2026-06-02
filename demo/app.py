@@ -13,6 +13,7 @@ Endpoints:
     GET  /api/valid-images         -> paginated valid-set index (?klass=&limit=&offset=)
     GET  /api/valid-images/{id}/raw-> raw image bytes
     POST /api/predict              -> classification + detection comparison
+    POST /api/vqa                  -> voice/text VQA over selected image
 """
 from __future__ import annotations
 
@@ -124,6 +125,35 @@ def api_valid_image_raw(image_id: int):
 
 
 # ---------------------------------------------------------------------------
+# Shared image resolution (upload file OR valid-set id)
+# ---------------------------------------------------------------------------
+def _resolve_image(raw: Optional[bytes], valid_image_id: Optional[int]):
+    """Return (pil_rgb, source, valid_id, ground_truth) from an upload OR a
+    valid-set id. Mirrors the EXIF/orientation handling used at training time.
+    """
+    if raw is not None:
+        try:
+            pil = Image.open(io.BytesIO(raw)).convert("RGB")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"cannot read image: {e}")
+        return pil, "upload", None, None
+    if valid_image_id is not None:
+        if valid_image_id < 0 or valid_image_id >= len(_VALID_INDEX):
+            raise HTTPException(status_code=404, detail="valid image id out of range")
+        it = _VALID_INDEX[valid_image_id]
+        pil = Image.open(it["image_path"]).convert("RGB")
+        # match training (load_image w/ exif_transpose)
+        from PIL import ImageOps
+        pil = ImageOps.exif_transpose(pil).convert("RGB")
+        ground_truth = {
+            "true_klass": it["true_klass"],
+            "gt_box_xyxy": it["gt_box_xyxy"],
+        }
+        return pil, "valid", valid_image_id, ground_truth
+    raise HTTPException(status_code=400, detail="provide either file or valid_image_id")
+
+
+# ---------------------------------------------------------------------------
 # API: predict
 # ---------------------------------------------------------------------------
 @app.post("/api/predict")
@@ -132,34 +162,8 @@ async def api_predict(
     valid_image_id: Optional[int] = Form(None),
     pipelines: str = Form("all"),
 ):
-    if file is not None:
-        raw = await file.read()
-        try:
-            pil = Image.open(io.BytesIO(raw)).convert("RGB")
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"cannot read image: {e}")
-        source = "upload"
-        ground_truth = None
-        valid_id = None
-    elif valid_image_id is not None:
-        if valid_image_id < 0 or valid_image_id >= len(_VALID_INDEX):
-            raise HTTPException(status_code=404, detail="valid image id out of range")
-        it = _VALID_INDEX[valid_image_id]
-        pil = Image.open(it["image_path"]).convert("RGB")
-        # EXIF orientation is handled by inference via real pixels; PIL.open keeps
-        # raw orientation. To match training (which uses load_image w/ exif_transpose)
-        # we apply the same correction here.
-        from PIL import ImageOps
-        pil = ImageOps.exif_transpose(pil).convert("RGB")
-        source = "valid"
-        valid_id = valid_image_id
-        ground_truth = {
-            "true_klass": it["true_klass"],
-            "gt_box_xyxy": it["gt_box_xyxy"],
-        }
-    else:
-        raise HTTPException(status_code=400, detail="provide either file or valid_image_id")
-
+    raw = await file.read() if file is not None else None
+    pil, source, valid_id, ground_truth = _resolve_image(raw, valid_image_id)
     W, H = pil.size
     pipeline_ids = "all" if pipelines in ("all", "", None) else pipelines
     result = inference.predict_image(pil, pipeline_ids)
@@ -174,6 +178,45 @@ async def api_predict(
         },
         "classification": result["classification"],
         "detection": result["detection"],
+    })
+
+
+# ---------------------------------------------------------------------------
+# API: vqa (voice/text question -> answer over the selected image)
+# ---------------------------------------------------------------------------
+@app.post("/api/vqa")
+async def api_vqa(
+    file: Optional[UploadFile] = File(None),
+    valid_image_id: Optional[int] = Form(None),
+    audio: Optional[UploadFile] = File(None),
+    question: Optional[str] = Form(None),
+):
+    raw = await file.read() if file is not None else None
+    pil, source, _valid_id, _gt = _resolve_image(raw, valid_image_id)
+
+    audio_bytes = await audio.read() if audio is not None else None
+    q_text = (question or "").strip() or None
+    if not audio_bytes and not q_text:
+        raise HTTPException(
+            status_code=400,
+            detail="provide audio or question (at least one)",
+        )
+
+    try:
+        from src import vqa as vqa_mod
+    except Exception as e:  # import-time failure (deps)
+        raise HTTPException(status_code=500, detail=f"VQA module unavailable: {e}")
+
+    try:
+        result = vqa_mod.answer(pil, question_text=q_text, wav_bytes=audio_bytes)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"VQA failed: {e}")
+
+    return JSONResponse({
+        "transcript": result["transcript"],
+        "question": result["question"],
+        "answer": result["answer"],
+        "image_source": source,
     })
 
 

@@ -32,3 +32,10 @@ python-multipart
 jupyterlab
 ipykernel
 nbconvert
+
+# --- 데모 VQA (음성질문 STT + 이미지 QA) ---
+transformers==5.9.0     # whisper-base(STT) + SmolVLM(VQA)
+accelerate
+soundfile               # WAV 디코딩 (ffmpeg 불필요)
+librosa                 # 16kHz 리샘플
+num2words               # SmolVLM 의존

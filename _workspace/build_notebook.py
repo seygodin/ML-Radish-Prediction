@@ -9,12 +9,13 @@ def code(t): cells.append({"cell_type":"code","id":f"c{len(cells):02d}","metadat
 
 md("""# 무(Radish) 질병 — 환경설정 · 데이터분석 · 학습 · 평가 · 데모 (self-contained)
 
-이 노트북은 **데이터만 준비되어 있다고 가정**하고(이미지·라벨이 `data/` 아래 추출됨), 나머지 **환경 설치 → 데이터 분석(EDA) → 학습 → 평가 → 데모**를 노트북 안에서 모두 수행합니다.
+이 노트북은 **데이터 경로(`DATA_DIR`)만 주면** 나머지를 모두 자동 수행합니다: **환경 설치 → (zip 자동 압축해제·정리) 데이터 준비 & 분석(EDA) → 학습 → 평가 → 데모**.
 
 - §0에서 의존성을 **현재 커널 환경에 직접 설치**(`%pip`)하므로 별도의 `.venv` 준비가 필요 없습니다. 무거운 작업은 `sys.executable`(이 커널의 파이썬) **서브프로세스**로 실행합니다.
+- §1에서 `DATA_DIR`의 zip을 **직접 압축 해제하고 by_disease·manifest까지 정리**합니다(이미 돼 있으면 건너뜀).
 - 학습 §2에는 **전체 실험(42개)이 그룹별로 모두 나열**되어 있습니다 — **불필요한 줄은 `#`로 주석처리**해 원하는 것만 학습하세요.
 
-**전제**: `data/`에 AI-Hub 무 데이터가 추출되어 있음(zip만 있다면 §1의 압축 해제 셀 사용). GPU(CUDA) 권장.""")
+**전제**: `DATA_DIR`에 AI-Hub 무 데이터(8개 zip 또는 추출된 `train/`·`valid/`)가 있음. GPU(CUDA) 권장.""")
 
 md("""## 0. 환경 설정 (이 셀이 모든 의존성을 설치)
 
@@ -57,36 +58,76 @@ print("torch", torch.__version__, "| cuda", torch.cuda.is_available(),
 
 md("""## 1. 데이터 준비 & 분석 (EDA)
 
-데이터(이미지·라벨)가 `data/` 아래 추출돼 있다고 가정합니다. zip만 있다면 첫 셀의 압축 해제 코드를 사용하세요. 이후 1:1 매칭 검증 → 질병종류별 분리(by_disease) → manifest 생성 → 데이터 분석 리포트(`report/REPORT.md`, figures)를 수행·표시합니다.""")
+**`DATA_DIR`만 지정**하면 노트북이 알아서 처리합니다: (zip만 있으면) **압축 해제 → 1:1 매칭 검증 → 질병종류별 분리(by_disease) → manifest 생성 → 데이터 분석 리포트(EDA)**.
+
+- `DATA_DIR`은 `train/`·`valid/`(각각 `[원천]·[라벨]무_*` zip 또는 추출된 폴더 포함)를 담은 데이터 루트입니다. repo의 `data/`와 다르면 자동으로 심링크해 파이프라인이 그대로 동작합니다.
+- 모든 단계는 **idempotent**(이미 추출/생성됐으면 건너뜀). 새 데이터셋이면 `REBUILD_MANIFEST=True`로 manifest를 다시 만드세요.""")
 
 code('''
-# §1a. (필요 시) zip 압축 해제 — 이미 추출돼 있으면 건너뛰세요
-# import glob as _g
-# if not _g.glob("data/train/[[]원천[]]무_0.정상/*"):
-#     for z in _g.glob("data/train/*.zip") + _g.glob("data/valid/*.zip"):
-#         run(["unzip", "-nq", z, "-d", z[:-4]])
+# §1-0. 데이터 경로 설정 — DATA_DIR이 repo의 data/와 다르면 심링크로 연결
+DATA_DIR = str(ROOT / "data")     # ← train/ valid/ 를 담은 데이터 루트. 다른 경로면 여기를 바꾸세요.
 
-# 라벨↔이미지 1:1 매칭 검증
+src_dir = Path(DATA_DIR).expanduser().resolve()
+assert src_dir.exists(), f"DATA_DIR 없음: {src_dir}"
+target = ROOT / "data"
+if src_dir != target.resolve():
+    if target.is_symlink():
+        target.unlink(); target.symlink_to(src_dir)
+    elif not target.exists():
+        target.symlink_to(src_dir)
+    elif not any(target.iterdir()):          # 비어있는 실제 폴더면 교체
+        target.rmdir(); target.symlink_to(src_dir)
+    else:
+        raise RuntimeError(f"{target} 가 비어있지 않은 실제 폴더라 심링크 불가. DATA_DIR을 data/로 두거나 data/를 비우세요.")
+    print(f"심링크 연결: {target} -> {src_dir}")
+else:
+    print("DATA_DIR = repo data/ (그대로 사용)")
+for sp in ("train", "valid"):
+    d = f"data/{sp}"
+    print(f"  {d}:", sorted(os.listdir(d))[:8] if os.path.isdir(d) else "(없음)")
+''')
+
+code('''
+# §1a. zip 자동 압축 해제 (idempotent) — data/{train,valid}/*.zip -> 같은 이름 폴더
+import zipfile
+zips = sorted(glob.glob("data/train/*.zip") + glob.glob("data/valid/*.zip"))
+print(f"발견된 zip: {len(zips)}개")
+for z in zips:
+    outdir = z[:-4]                                   # '<name>.zip' -> '<name>/'
+    if os.path.isdir(outdir) and any(os.scandir(outdir)):
+        print(f"  [skip] {os.path.basename(z)} (이미 추출됨)"); continue
+    os.makedirs(outdir, exist_ok=True)
+    with zipfile.ZipFile(z) as zf:
+        zf.extractall(outdir)
+    print(f"  [extract] {os.path.basename(z)} -> {outdir} ({len(os.listdir(outdir))} files)")
+if not zips:
+    print("zip 없음 — 이미 추출돼 있다고 가정")
+''')
+
+code('''
+# §1b. 라벨↔이미지 1:1 매칭 검증
 run([PY, "data/verify_pairs.py"])
 ''')
 
 code('''
-# §1b. 질병 종류별 분리(by_disease 심링크) + manifest 생성
+# §1c. 질병 종류별 분리(by_disease) + manifest 생성/재생성
 run([PY, "data/split_by_disease.py"])
 
-if not glob.glob("_workspace/data/manifest_classification.csv"):
-    run([PY, "-m", "src.data.build_manifest"])      # 전체 스캔(수 분). 저장소에 있으면 생략됨.
+REBUILD_MANIFEST = False     # 새(다른) 데이터셋이면 True — 전체 스캔(수 분)으로 manifest 재생성
+need = REBUILD_MANIFEST or not glob.glob("_workspace/data/manifest_classification.csv")
+if need:
+    run([PY, "-m", "src.data.build_manifest"])
 else:
-    print("manifest 존재 → 재생성 생략")
+    print("manifest 존재 → 재생성 생략 (새 데이터면 REBUILD_MANIFEST=True)")
 ''')
 
 code('''
-# §1c. 데이터 분석 리포트 생성 (report/REPORT.md, report/figures/01~11, stats.json, metadata.csv)
+# §1d. 데이터 분석 리포트 생성 (report/REPORT.md, report/figures/01~11, stats.json, metadata.csv)
 run([PY, "data/analyze.py"])
 ''')
 
 code('''
-# §1d. EDA 핵심 통계 + 그림 표시
+# §1e. EDA 핵심 통계 + 그림 표시
 from IPython.display import Image, Markdown, display
 if os.path.exists("report/stats.json"):
     s = json.load(open("report/stats.json"))
