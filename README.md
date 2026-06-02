@@ -125,6 +125,18 @@ cd ..
 
 ---
 
+## 빠른 시작: 노트북
+
+데이터·환경이 준비됐다면 **`radish_demo.ipynb`** 한 파일로 학습 → 평가(지표 표·그림) → 데모를 차례로 실행할 수 있다(무거운 작업은 내부에서 `./.venv/bin/python` 서브프로세스로 수행). 기본은 대표 모델(강한 baseline + Ours + Ours-detection)만 돌리고, 전체 재현은 노트북 마지막 셀 안내를 따른다.
+
+```bash
+uv pip install --python .venv/bin/python -r requirements.txt   # jupyter 포함
+./.venv/bin/python -m ipykernel install --user --name python3 --display-name "Python 3 (.venv)"
+./.venv/bin/jupyter lab    # radish_demo.ipynb 열고 위에서부터 실행
+```
+
+아래는 노트북 없이 CLI로 단계별 실행하는 방법이다.
+
 ## 재현: 학습
 
 학습은 **사양 yaml 하나**로 완결된다(`_workspace/specs/exp_*.yaml`에 모델·데이터·loss·optimizer·metric·seed가 동결). 예:
