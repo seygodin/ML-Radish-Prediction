@@ -32,6 +32,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 2026-06-07 | report/PAPER.md 작성: 외부 공개용 단일 자립 논문(goal~reference 9섹션+부록A/B, 그림 8개 base64 내장, 내부경로 참조 0). 서론 깔때기화 + Related Work 농업AI 실논문 인용([22]~[29]) | report/PAPER.md | 사용자 "paper final report / 공개용 정리 / 농업AI related work" 요청 |
 | 2026-06-07 | §6.8 Explainability 추가: 예시 normal+abnormal(d3·d4) Ours detection 시각화(forward-only) + VQA 영어 질병특성 QA 예시. det objectness 0.026/0.978/0.950 정확분리, VQA는 보조설명 한정 | report/PAPER.md, _workspace/eval/run_explainability.py, report/figures/exp_explainability_detection.png | 사용자 "설명가능성 실험(detection 시각화+VQA QA)" 요청 |
 | 2026-06-07 | §6.9 XAI 추가: Ours(dinov3_base_focal 3-class) Grad-CAM(frozen 백본→input requires_grad로 grad 흘림, blocks[-1].norm1 32×32 reshape)+LIME+SHAP. 세 기법 모두 무 잎·병변에 근거 집중(DINO 표현 정렬 교차검증). XAI 의존성 추가 | report/PAPER.md, _workspace/eval/run_xai.py, report/figures/exp_xai_dinov3.png, requirements | 사용자 "Grad-CAM/LIME/SHAP로 DINO 이해도 확인" 요청 |
+| 2026-06-07 | PAPER.md 그림을 base64 내장→외부 figures/*.png 상대참조로 전환(GitHub은 data:URI 미렌더·대용량 md raw표시 → 결과 안 보임). §6.9에 Grad-CAM/LIME/SHAP 결과 정성표 추가. 공개 시 PAPER.md+report/figures/ 동반 | report/PAPER.md, CLAUDE.md | 사용자 "PAPER.md에 XAI 결과가 안 보임, 반영" 요청(그림 외부참조 선택) |
+| 2026-06-07 | Related Work를 4하위섹션 재구성(§4.1 농업AI 7 / §4.2 AI기술 7 / §4.3 설명가능AI 7 / §4.4 차별성). XAI 참고문헌 7개 신규([30]Grad-CAM~[36]DINO), §6.9에 [30][31][32] 인용. 36개 참조 전부 인용·정의 일치 검증 | report/PAPER.md, CLAUDE.md | 사용자 "related work 3그룹×7+차별성" 요청 |
+| 2026-06-07 | §5.0 전체 파이프라인 개요 추가: 사용자 제공 radish_overview.png(DINOv3 사전학습→전이학습 Linear Probing/Fine-tuning→head→예측→평가) 삽입 + 흐름 설명, Ours는 (A)Linear Probing 채택 명시 | report/PAPER.md(§5.0), report/figures/radish_overview.png | 사용자 "전체 플로우 그림+설명 추가" 요청 |
 
 ## Project goal
 
