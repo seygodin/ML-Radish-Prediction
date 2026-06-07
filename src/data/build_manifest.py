@@ -43,10 +43,12 @@ DET_HEADER = [
 
 
 def _rel(p: str) -> str:
+    """repo 루트 기준 상대경로 문자열로 변환(manifest 이식성)."""
     return os.path.relpath(p, REPO_ROOT)
 
 
 def _row_base(s: Sample):
+    """Sample 하나를 manifest 공통 컬럼 dict로 직렬화(실제 크기 기준 좌표)."""
     return {
         "split": s.split,
         "image_path": _rel(s.image_path),
@@ -100,6 +102,7 @@ CLS_LABEL_MAPS = {
 
 
 def write_classification_manifest(membership) -> int:
+    """전 split·클래스 샘플을 분류 manifest CSV로 기록(전체 풀스캔)."""
     cat = build_catalog()
     all_samples = []
     for split in ("train", "valid"):
@@ -126,6 +129,7 @@ def write_classification_manifest(membership) -> int:
 
 
 def write_detection_manifest() -> int:
+    """질병 샘플을 detection manifest CSV로 기록."""
     cat = build_catalog()
     samples = []
     for split in ("train", "valid"):
@@ -142,6 +146,7 @@ def write_detection_manifest() -> int:
 
 
 def write_data_card(membership, train_counts, valid_counts, n_cls, n_det):
+    """세팅별 분포·변환·스킵·공개 API를 요약한 data_card.md 작성."""
     cat = build_catalog()
     skip = Counter(reason for _, reason in cat.skipped)
 
@@ -253,6 +258,7 @@ def write_data_card(membership, train_counts, valid_counts, n_cls, n_det):
 
 
 def main():
+    """전체 스캔으로 manifest/ data_card를 재생성하는 진입점."""
     os.makedirs(OUT_DIR, exist_ok=True)
     # Regenerate from source truth: force a full image scan (never read a
     # possibly-stale manifest), so the skip log and real sizes are authoritative.

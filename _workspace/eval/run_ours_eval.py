@@ -49,6 +49,7 @@ from sklearn.metrics import (  # noqa: E402
 # metric helpers (sklearn = independent cross-check vs run_eval primitives)
 # ---------------------------------------------------------------------------
 def wilson_ci(k, n, z=1.96):
+    """이항 비율의 Wilson 95% 신뢰구간(저·고) — 소표본 지표에 CI 병기용."""
     if n == 0:
         return (float("nan"), float("nan"))
     p = k / n
@@ -59,6 +60,7 @@ def wilson_ci(k, n, z=1.96):
 
 
 def metrics_from_probs(probs, labels, num_classes):
+    """확률·정답에서 분류 지표(PR-AUC/F1/recall/precision/accuracy/AUROC)를 재계산."""
     probs = np.asarray(probs, dtype=np.float64)
     labels = np.asarray(labels, dtype=np.int64)
     preds = probs.argmax(axis=1)
@@ -123,6 +125,7 @@ mcls_valid = mcls[mcls.split == "valid"]
 
 
 def manifest_valid_dist(setting):
+    """manifest의 valid 라벨 분포 반환(정합성 교차검증용)."""
     lab = "label_" + setting
     vv = mcls_valid[mcls_valid[lab] >= 0]
     return vv[lab].value_counts().sort_index().to_dict(), len(vv)
@@ -139,6 +142,7 @@ from src.models import build_classifier  # noqa: E402
 
 @torch.no_grad()
 def forward_collect(model, loader, device, num_classes):
+    """모델로 valid를 forward해 확률/정답을 수집."""
     model.eval()
     all_probs, all_labels, loss_sum, n = [], [], 0.0, 0
     use_amp = device.type == "cuda"
@@ -157,6 +161,7 @@ def forward_collect(model, loader, device, num_classes):
 
 
 def count_params(model):
+    """모델의 total/trainable 파라미터 수 반환."""
     total = sum(p.numel() for p in model.parameters())
     train = sum(p.numel() for p in model.parameters() if p.requires_grad)
     return total, train

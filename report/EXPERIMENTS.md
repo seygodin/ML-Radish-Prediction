@@ -11,7 +11,7 @@
 
 valid는 **원분포(다운샘플 없음)**: normal 1303 + disease(d3 76 / d4 24). 불균형이 심해 accuracy·AUROC는 **단독 해석 금지**(아래 §2 참조: AUROC가 0.94–1.0으로 포화돼 백본 분리력이 약함). 주지표는 여전히 PR-AUC, 보조로 F1-macro·precision.
 
-> **백본 6종 표기**: NeXtViT-base(`nextvit20`)는 사용자 요청으로 본 리포트의 모든 표·그림·해석에서 제외했다. 학습/예측 산출물(`experiments/nextvit20_*`)은 디스크에 보존된다(상세 §8). 따라서 아래 모든 카운트는 6 백본 / 24 run 기준이다.
+> **백본 6종 표기**: NeXtViT-base(`nextvit20`)는 사용자 요청으로 본 리포트의 모든 표·그림·해석에서 제외했다. 학습/예측 산출물(`experiments/nextvit20_*`)은 디스크에 보존된다(상세 §10 변경 이력). 따라서 아래 모든 카운트는 6 백본 / 24 run 기준이다.
 
 ---
 
@@ -42,7 +42,7 @@ valid는 **원분포(다운샘플 없음)**: normal 1303 + disease(d3 76 / d4 24
 
 ## 0. 정합성 교차검증 요약 (predictions ↔ manifest, 재계산 ↔ 보고)
 
-**변경 이력(이번 갱신)**: 백본 3종 추가(DenseNet121 / ResNet50 / Vision-Mamba=`mamba`(mambapy pscan)) → 분류 12→18 run, detection 3→6 run, **총 12→24 run**. 분류 표에 **AUROC + 7-메트릭(accuracy/train_loss/val_loss/recall/precision/f1/AUROC) 도입**. 기존 3 백본 결과·해석은 보존하고 6 백본 기준으로 표·그림·해석을 확장(상세 §8). NeXtViT-base(`nextvit20`)는 사용자 요청으로 표·그림에서 제외(산출물은 보존).
+**변경 이력(이번 갱신)**: 백본 3종 추가(DenseNet121 / ResNet50 / Vision-Mamba=`mamba`(mambapy pscan)) → 분류 12→18 run, detection 3→6 run, **총 12→24 run**. 분류 표에 **AUROC + 7-메트릭(accuracy/train_loss/val_loss/recall/precision/f1/AUROC) 도입**. 기존 3 백본 결과·해석은 보존하고 6 백본 기준으로 표·그림·해석을 확장(상세 §10). NeXtViT-base(`nextvit20`)는 사용자 요청으로 표·그림에서 제외(산출물은 보존).
 
 - **표본 수·라벨 분포**: **baseline 24 run + Ours 4 run(분류 3 + detection 1) 전부** predictions의 valid 표본 수·라벨 분포가 manifest valid 분포와 **정확히 일치**(분류 `dist_match=True` baseline 18/18 + Ours 3/3, detection N=1403·pos/neg=100/1303 일치 **baseline 6/6 + Ours(DINOv3-B detection) 1/1**). 누수·오집계·split 위반 징후 **없음**. (Ours 분류=DINOv3 frozen+head 평가·판정 §6; Ours detection=DINOv3-B frozen+single-box head 평가 §3/§3B.)
   - normal_vs_d3 valid = 1303 normal + 76 d3 = 1379
@@ -50,7 +50,7 @@ valid는 **원분포(다운샘플 없음)**: normal 1303 + disease(d3 76 / d4 24
   - normal_d3_d4 valid = 1303 + 76 + 24 = 1403
   - detection valid = 100 disease(d3 76 + d4 24, GT 박스 보유) + 1303 normal(음성, 빈 GT) = 1403
 - **재계산 ↔ 보고**: 분류 PR-AUC/F1/recall/precision/accuracy/confusion 및 **신규 7-메트릭(recall_macro/precision_macro/f1_macro/AUROC)** 가 보고치와 모두 일치(허용오차 내). 신규 12 run은 `metrics.json.final`에 7키가 이미 있어 predictions 재계산과 대조해 일치 확인. **기존 3 백본 9 run은 AUROC·macro-PRF가 metrics.json에 없어 predictions에서 독립 재계산**했고, sklearn `roc_auc_score`/`recall_score`(macro)와 교차검증해 동일함을 확인(예: convnextv2_d3 AUROC=0.9626 = sklearn 0.9626). detection det_pr_auc/det_roc_auc/presence_recall@0.5/fp_rate@0.5/IoU 분포 모두 일치, mAP@0.5만 AP 보간 방식 차이로 미세 차이(무시 가능). **불일치 run 없음.**
-- **detection objectness collapse → 수정 → 재학습·재평가 완료**: 초기 detection 3 run은 정상 이미지를 음성으로 다루지 않아 **objectness가 전 이미지(정상 포함)에서 ~1.0** 으로 붕괴, 정상/질병을 분리하지 못했다. 데이터 로더(정상=음성·빈 GT)와 학습/지표 처리를 수정해 **재학습**했고, 재평가 결과 **objectness 붕괴가 해소**됨을 정량 확인했다: 질병 objectness median ≈0.997–0.999 vs 정상 median ≈0.000–0.002, 정상이 임계값 0.5를 넘는 비율 4–8/1303 (0.3–0.6%). 이제 objectness는 실질적인 **이미지 단위 질병 점수**로 동작한다(아래 §3). 변경 이력은 §8 참조.
+- **detection objectness collapse → 수정 → 재학습·재평가 완료**: 초기 detection 3 run은 정상 이미지를 음성으로 다루지 않아 **objectness가 전 이미지(정상 포함)에서 ~1.0** 으로 붕괴, 정상/질병을 분리하지 못했다. 데이터 로더(정상=음성·빈 GT)와 학습/지표 처리를 수정해 **재학습**했고, 재평가 결과 **objectness 붕괴가 해소**됨을 정량 확인했다: 질병 objectness median ≈0.997–0.999 vs 정상 median ≈0.000–0.002, 정상이 임계값 0.5를 넘는 비율 4–8/1303 (0.3–0.6%). 이제 objectness는 실질적인 **이미지 단위 질병 점수**로 동작한다(아래 §3). 변경 이력은 §9 참조.
 - **detection 표본**: predictions의 양성/음성이 **6 run 모두 정확히 100/1303** 로 manifest(질병 100 = d3 76 + d4 24, 정상 1303)와 일치. 정상은 빈/null GT, 질병은 GT 박스 1개를 보유.
 
 상세 항목별 통과/실패는 `_workspace/eval/verify_<name>.md`(24개) 참조.
@@ -332,7 +332,7 @@ run별: `report/figures/curves_<name>.png`(24개). 종합 패널: `report/figure
 - 가장 심한 과적합은 여전히 **ConvNeXtV2 / d3**(반등 +0.78, best ep=5)와 **VisionMamba**(반등 +0.26–0.33, best ep d4=14·3c=4로 매우 일러 학습 후반은 전부 과적합 구간). 둘의 낮은 PR-AUC와 일관.
 - **신규 DenseNet121·ResNet50가 가장 안정**(반등 +0.08–0.21, train-val gap 최소). 과적합 저항이 분류 성능 우위로 직결(§2). EfficientNetV2도 안정(기존 최고).
 - best epoch 선택은 **val primary metric(PR-AUC) 기준**이라 val_loss 최저 epoch과 다를 수 있다(소표본에서 val_loss·val PR-AUC 비동행).
-- **detection (6 백본)**: 모두 60 epoch 완주, train/val loss 단조 감소·**val_loss 반등 없음**(val_loss 0.10–0.15) — 분류 대비 과적합 미미. det_pr_auc는 epoch 초반부터 0.8+로 시작해 빠르게 0.99+ 수렴. **NeXtViT-s·VisionMamba는 fp32(AMP off)로 학습**(fp16 NaN 회피 → §6·§7). 곡선: `report/figures/curves_<name>_detection_singlebox.png`.
+- **detection (6 백본)**: 모두 60 epoch 완주, train/val loss 단조 감소·**val_loss 반등 없음**(val_loss 0.10–0.15) — 분류 대비 과적합 미미. det_pr_auc는 epoch 초반부터 0.8+로 시작해 빠르게 0.99+ 수렴. **NeXtViT-s·VisionMamba는 fp32(AMP off)로 학습**(fp16 NaN 회피 → §6·§8). 곡선: `report/figures/curves_<name>_detection_singlebox.png`.
 
 ---
 
@@ -441,7 +441,7 @@ design-notes 기준: 3-class 원분포 baseline 최고 **PR-AUC 0.570(DenseNet12
 
 ### 6.4 해석
 
-- **왜 frozen SSL feature가 from-scratch를 능가하나**: baseline 6 백본은 pretrained 미로딩(§7 한계 1)이라 소규모·불균형 무 데이터로 표현을 처음부터 학습 → 표현력 상한이 낮다. Ours/Ours+는 대규모 자기지도(DINOv3) feature가 **이미 일반적 시각 표현을 갖춘 채 동결**되어, 작은 head만으로도 강한 분리를 얻는다. 가장 어려운 **3-class 원분포 PR-AUC에서 Ours+ +30.7%**로 격차가 가장 크다(쉬운 2-class는 baseline도 이미 잘 해 PR-AUC 격차 작음).
+- **왜 frozen SSL feature가 from-scratch를 능가하나**: baseline 6 백본은 pretrained 미로딩(§9 한계 1)이라 소규모·불균형 무 데이터로 표현을 처음부터 학습 → 표현력 상한이 낮다. Ours/Ours+는 대규모 자기지도(DINOv3) feature가 **이미 일반적 시각 표현을 갖춘 채 동결**되어, 작은 head만으로도 강한 분리를 얻는다. 가장 어려운 **3-class 원분포 PR-AUC에서 Ours+ +30.7%**로 격차가 가장 크다(쉬운 2-class는 baseline도 이미 잘 해 PR-AUC 격차 작음).
 - **고해상도(512)+큰 backbone(ViT-B)이 3-class에 준 이득**: small@256 → base@512로 가면서 3-class 원분포 **PR-AUC 0.689→0.745(+0.056), F1 0.698→0.750(+0.052)**, 균형 3-class **PR 0.810→0.885(+0.075), F1 0.774→0.875(+0.100)**. 2-class도 원분포 F1이 d3 0.924→0.983, d4 0.738→0.866으로 크게 상승. 고해상도가 미세 병변·d3↔d4 구분에 유리하고, 더 큰 backbone이 표현력을 높여 **가장 어려운 3-class에서 이득이 가장 크게 나타난다**(쉬운 2-class PR-AUC는 small도 이미 천장이라 base는 F1에서 주로 향상).
 - **d4 소표본·3-class F1 병목**: 원분포 d4 valid N=24로 극소. base-CE 3-class 원분포 confusion `[[1286,1,16],[1,50,25],[0,3,21]]` → (a) PR-AUC는 랭킹 기반이라 높지만(0.745), (b) **argmax F1-macro는 d4 precision 0.339**(정상 16장+d3 25장 일부가 d4로 끌려감)에 눌린다. d4 **recall은 0.875로 양호**(놓침 적음)하나, 정상 다수가 d4로 새는 **낮은 precision**이 macro-F1을 0.750에 묶는다 — 이것이 F1 절대 목표(0.851) 미달의 직접 원인. **PR-AUC로는 목표 초과, argmax-F1으로는 미달**이 이 소표본·임계값 한계의 결과.
 - **focal+aug가 d4 병목을 얼마나 완화했나(정직)**: focal+aug 3-class 원분포 confusion `[[1292,2,9],[1,52,23],[0,3,21]]`. base-CE 대비 **정상→d4 오분류가 16→9장으로 감소** → **d4 precision 0.339→0.396**(21/53), d4 recall은 21/24=0.875로 **불변**. d3는 recall 0.658→0.684(소폭↑)·precision 0.926→0.912(소폭↓). 즉 focal의 hard-example 집중(+강한 증강)이 **정상↔d4 결정 경계를 약간 조여 d4 false-positive를 줄였으나**, d4 precision 95% CI가 여전히 0.276–0.531로 매우 넓고 낮아 **F1 병목은 완화되었을 뿐 해소되지 않았다**(N=24 한계). 이것이 focal+aug에서도 F1 0.774 < 0.851로 절대 목표 미달인 직접 이유.
@@ -526,7 +526,76 @@ design-notes 기준: 3-class 원분포 baseline 최고 **PR-AUC 0.570(DenseNet12
 
 ---
 
-## 7. 한계 (해석 시 필수 고려)
+## 7. Sensitivity: 입력 노이즈 (Ours, 3-class)
+
+학습된 **Ours**(DINOv3 ViT-B/16 frozen @512 + 2-layer head, **focal+aug**, 3-class = `experiments/dinov3_base_focal_normal_d3_d4/`)의 **입력 노이즈 강건성**을 측정한다. best.pt는 **forward 전용 로드(재학습·가중치 변경 없음)**, 평가는 **원분포 valid(N=1403, balance_valid=False)**·seed=42 고정.
+
+**노이즈 공식·적용지점**: 사용자 지정 `Noised = torch.rand_like(Image) * N_ratio + Image`를 **모델 입력 텐서**에 적용한다 — 즉 valid 변환(리사이즈+ImageNet 정규화)의 출력인 **정규화된 입력 텐서 `x` ∈ [B,3,512,512]** 에
+
+> `x_noised = x + torch.rand_like(x) * N_ratio`   (`rand ~ U[0,1)`)
+
+를 더한 뒤 forward한다. **노이즈는 픽셀(원본 이미지)이 아니라 정규화 입력 텐서 단계에 가산**되며(정규화 스케일 기준 U[0,1)·N_ratio 크기), 재현 위해 N_ratio별로 `torch.manual_seed(42)` 고정. `N_ratio ∈ {0.0(clean 기준선), 0.1, 0.2, 0.3, 0.4, 0.5}`.
+
+지표는 predictions softmax에서 **sklearn 독립 계산**: PR-AUC(주, disease OvR macro)·F1-macro·accuracy·AUROC(OvR macro).
+
+### 7-1. N_ratio vs 성능 (원분포 valid, N=1403)
+
+| N_ratio | PR-AUC (주) | F1-macro | accuracy | AUROC | ΔPR-AUC (vs clean) | rel% |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **0.0 (clean)** | **0.7651** | **0.7718** | **0.9722** | **0.9951** | — | — |
+| 0.1 | 0.7619 | 0.7807 | 0.9729 | 0.9951 | −0.0032 | −0.4% |
+| 0.2 | 0.7478 | 0.7728 | 0.9686 | 0.9943 | −0.0173 | −2.3% |
+| 0.3 | 0.7468 | 0.7539 | 0.9644 | 0.9941 | −0.0183 | −2.4% |
+| 0.4 | 0.7550 | 0.7516 | 0.9636 | 0.9941 | −0.0101 | −1.3% |
+| 0.5 | 0.7518 | 0.7524 | 0.9629 | 0.9940 | −0.0133 | −1.7% |
+
+> **clean 대조(정합성)**: N_ratio=0.0의 PR-AUC 0.765·F1 0.772·acc 0.972·AUROC 0.995는 §6 Ours focal+aug 3-class 원분포(PR-AUC 0.765·F1 0.774·acc 0.973·AUROC 0.995)와 **|Δ|≤0.01로 일치**(같은 모델·valid·noise 없음 → 일치해야 정상, 스크립트가 assert로 검증). F1 0.7718 vs 보고 0.774 차이는 반올림 내.
+
+그림: `report/figures/exp_sensitivity_dinov3.png`(N_ratio vs PR-AUC/F1 곡선 + acc/AUROC 보조 패널).
+
+### 7-2. 해석 (robustness)
+
+- **전반적으로 매우 강건**: 노이즈를 입력 텐서 표준편차에 맞먹는 크기(N_ratio=0.5는 정규화 스케일에서 U[0,1)·0.5 가산)까지 키워도 **주지표 PR-AUC 저하는 최대 −0.018(−2.4%, N_ratio=0.3)**, N_ratio=0.5에서도 −0.013(−1.7%)에 그친다. AUROC는 0.995→0.994로 거의 불변, accuracy도 0.972→0.963(−0.9%p)으로 완만.
+- **단조 저하는 아님**: PR-AUC는 0.3에서 저점(0.747) 후 0.4에서 일부 회복(0.755). 작은 N에서 F1은 오히려 소폭 상승(0.1에서 0.781). 이는 가산 노이즈가 약한 정규화/dropout처럼 작용해 argmax 결정을 흔드는 정도가 작기 때문으로, **저하 폭이 d4 N=24 소표본 변동(§9 한계 2)과 같은 스케일**이라 N_ratio 간 미세 우열은 통계적으로 단정하기 어렵다. 큰 추세는 **노이즈↑ → 성능 소폭↓**.
+- **강건성의 출처**: backbone(DINOv3 ViT-B/16)이 **frozen**이고 자기지도 사전학습 특징이 입력 섭동에 안정적이며, head만 학습된 구조라 입력 텐서 가산 노이즈가 깊은 표현을 크게 교란하지 않는다. 단, 노이즈를 **정규화 입력 텐서**에 가한 것이라 원본 픽셀(0–255)·JPEG 압축·센서 노이즈 등 **실제 촬영 노이즈와는 분포가 다름**을 해석 시 유의(아래 §9 한계 참조).
+
+데이터: `_workspace/eval/sensitivity_dinov3.json`. 스크립트: `_workspace/eval/run_sensitivity_eval.py`(평가)·`make_sensitivity_fig.py`(그림).
+
+---
+
+## 8. Stability: train ratio sweep (Ours, 3-class)
+
+학습 데이터량(`train_ratio`)에 따른 **Ours**(DINOv3 ViT-B/16 frozen @512 + 2-layer head, **focal+aug**, **3-class** = `normal_d3_d4`)의 성능 **안정성**을 정리한다. `train_ratio ∈ {0.1, 0.3, 0.5, 0.7, 0.9}`는 신규 학습 run(`experiments/dinov3_base_focal_r{10,30,50,70,90}_normal_d3_d4/`), **참조점 `train_ratio=1.0`은 §6 정본 Ours**(`experiments/dinov3_base_focal_normal_d3_d4/`)와 **동일 run**이다. 모두 backbone·head·해상도(512)·trainable(395k)·loss(focal γ2)·aug(strong)·seed 동결, **동일 valid(원분포, N=1403 = normal 1303 / d3 76 / d4 24)**. **재학습 없음** — `metrics.json` + `predictions/valid.npz`만 사용, best.pt 미로딩.
+
+`train_ratio`는 **균형 다운샘플된 train**을 추가로 비율 추출한다(train 로더가 클래스 균형이라 각 비율에서 **클래스당 표본 수가 동일**). 따라서 표의 "train/클래스"는 normal=d3=d4 공통 표본 수다.
+
+지표는 `predictions`의 softmax에서 **sklearn 독립 재계산**: PR-AUC(주, disease d3·d4 OvR macro)·F1-macro·accuracy·AUROC(OvR macro). **6점 전부 predictions↔manifest 분포 일치(dist_match=PASS, N=1403)·보고치↔재계산 |Δ|≤0.01 일치**(스크립트가 assert). `train_ratio=1.0` 재계산값 PR-AUC **0.765**·F1 **0.774**·acc **0.973**·AUROC **0.995**는 §6 Ours focal+aug 3-class 원분포 수치와 **일치**(같은 run이므로 일치해야 정상).
+
+### 8-1. train_ratio vs 성능 (원분포 valid, N=1403)
+
+| train_ratio | train/클래스 | train 총합 | PR-AUC (주) | F1-macro | accuracy | AUROC | best ep |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0.1 | 23 | 69 | 0.4892 | 0.3158 | 0.7014 | 0.9556 | 3 |
+| 0.3 | 68 | 204 | 0.6402 | 0.6608 | 0.9473 | 0.9891 | 26 |
+| 0.5 | 114 | 342 | 0.6802 | 0.6978 | 0.9551 | 0.9917 | 14 |
+| 0.7 | 159 | 477 | 0.7476 | **0.5594** | 0.9387 | 0.9952 | 9 |
+| 0.9 | 204 | 612 | 0.7514 | 0.7337 | 0.9629 | 0.9948 | 10 |
+| **1.0 (=§6 Ours)** | **227** | **681** | **0.7647** | **0.7743** | **0.9729** | **0.9951** | 26 |
+
+그림: `report/figures/exp_stability_dinov3.png`(좌: train_ratio vs PR-AUC/F1 곡선 + train 표본수 보조축, 우: accuracy/AUROC 포화 패널).
+
+### 8-2. 해석 (안정성)
+
+- **PR-AUC(주지표)는 데이터량에 거의 단조 증가하며 90%↑에서 포화(수확체감)**: 0.489(r0.1) → 0.640 → 0.680 → 0.748(r0.7) → 0.751(r0.9) → 0.765(r1.0). r0.1→r0.5에서 +0.191로 급상승한 뒤, r0.7~r1.0 구간은 0.748→0.765(+0.017)에 그쳐 **추가 데이터의 한계효용이 작다**. 즉 Ours의 주지표는 데이터량 증가에 **단조·안정적**으로 반응하며, 보유 데이터의 ~70–90%만으로도 정본(r1.0) PR-AUC의 98% 이상에 도달한다.
+- **accuracy·AUROC는 더 일찍 포화**: AUROC는 r0.1에서 이미 0.956, r0.3부터 0.989↑로 사실상 천장. accuracy도 r0.3부터 0.94↑(다수 클래스 normal 1303 편향). 두 지표는 데이터량 민감도가 낮아 **stability 판단 근거로 부적합**(§9 한계 4) — PR-AUC/F1를 본다.
+- **F1-macro는 단조가 아니라 변동**: r0.7에서 **0.559로 급락**(PR-AUC는 0.748로 오히려 높음). 원인은 (1) **F1-macro가 argmax(임계값 0.5) 의존 지표**라 확률 분리(PR-AUC/AUROC)가 좋아도 **decision boundary가 소수 클래스 d4(valid N=24)에서 흔들리면 macro 평균이 크게 떨어짐**, (2) **early-stop은 PR-AUC로 best epoch을 고르므로**(r0.7 best=ep9) PR-AUC-최적 체크포인트가 F1-최적과 어긋날 수 있음. r0.7의 낮은 F1은 PR-AUC가 높은 epoch에서 d4 argmax 분류가 불리하게 잡힌 결과로, **PR-AUC 추세(안정)와 F1 변동(불안정)은 같은 모델의 다른 단면**이다.
+- **소표본 한계 병기**: valid **d4=24장**이라 d4가 1~2장만 다르게 분류돼도 d4 recall/precision이 ~0.04~0.08씩 출렁이고, 이것이 macro-F1을 좌우한다(§9 한계 2의 Wilson CI 폭 ~0.2와 동일 스케일). train 측도 r0.1은 클래스당 **23장**으로 극소표본이라 r0.1 수치(PR-AUC 0.489)는 데이터 부족의 하한 신호로만 읽고 단일 우열 판단은 금물. 따라서 **단일 시드·소표본**임을 감안해 F1의 비단조는 노이즈로 해석하고, **안정성의 결론은 단조·포화가 뚜렷한 PR-AUC를 기준**으로 내린다.
+
+데이터: `_workspace/eval/stability_dinov3.json`. 스크립트: `_workspace/eval/run_stability_eval.py`(평가)·`make_stability_fig.py`(그림).
+
+---
+
+## 9. 한계 (해석 시 필수 고려)
 
 1. **from-scratch (pretrained 미로딩, 6 백본 전부)** — 절대 성능 상한이 낮다. 백본 간 상대 비교·Ours 대비 기준선으로만 사용. pretrained 로딩 시 전 지표 상향 여지 큼.
 2. **소표본·다운샘플** — train d4=227쌍, 3-class=type당 227. **valid disease_4=24장**이라 d4 관련 지표 CI 매우 넓음(recall CI 폭 ~0.2). 단일값 우열 판단 금지.
@@ -539,9 +608,11 @@ design-notes 기준: 3-class 원분포 baseline 최고 **PR-AUC 0.570(DenseNet12
 
 ---
 
-## 8. 변경 이력 (회귀 추적)
+## 10. 변경 이력 (회귀 추적)
 
-- **[현재 갱신] §3·§3B detection 표에 Ours(DINOv3-B detection) 행 추가(pretrained-frozen 구분 주석)**: `experiments/dinov3_base_detection_singlebox/`(DINOv3 ViT-B/16 frozen @512 + single-box+objectness head, **total 85.84M / trainable 0.200M=head only**)을 §3-1(이미지 단위 검출)·§3-2(국소화)·§3B(균형 valid) 표 하단에 **굵게+구분선으로 추가**. 원분포(§3)는 저장 `predictions/valid.json`에서, 균형(§3B)은 best.pt **forward 전용 로드(가중치 변경 없음)** + `balance_valid=True`(seed=42, img512, fp32)로 재평가해 det_pr_auc/det_roc_auc/presence_recall@0.5/fp_rate@0.5/mAP@0.5/IoU median을 **독립 재계산**. **정합성**: predictions↔manifest N=1403·pos/neg=100/1303 **PASS**, reported↔recomputed 일치(mAP만 AP 보간차 ≤0.05), **sklearn `average_precision_score`/`roc_auc_score` 교차검증 orig·balanced 모두 1e-9 이내 일치**. **결과**: 원분포·균형 둘 다 det PR-AUC=ROC-AUC=**1.0**, presence_recall **1.0**(100/100), fp_rate orig 1/1303(0.08%)·balanced 0/100 → **검출은 baseline 6종과 동급(포화)**; objectness 분리 깨끗(질병 median 0.955 vs 정상 0.017). 국소화 IoU median **0.565**(mAP 0.491)로 baseline 범위(0.57–0.67) 하단. **공정성 주석**: Ours는 자기지도 pretrained frozen+head-only라 from-scratch baseline과 동일조건 아님(params `(frozen)+(tr)` 병기). **⚠️ best-epoch 각주**: det_pr_auc가 ep0부터 1.0 포화→early-stop이 best=ep0 선택→저장 predictions의 **국소화 IoU가 전 epoch 최저(0.565)**, 후반(ep≥28) IoU median ≈0.64까지 상승(train.log/per_epoch). 검출 지표는 ep0부터 포화라 epoch 선택과 무관 — 이 한계를 §3-1/§3-2/§3B 각주에 명시. 신규: `run_ours_detection_eval.py`, 데이터 `ours_detection.json`, verify `verify_dinov3_base_detection_singlebox.md`. 그림 `exp_detection.png`에 Ours 막대(주황 음영)·objectness 중앙값 다이아몬드·IoU 히스토그램(검정 점선) 추가·재생성. **기존 baseline 6 백본 detection 행·수치·해석·그림은 전부 불변**(재실행으로 재계산값 일치 확인).
+- **[현재 갱신] §8 Stability(train_ratio sweep, Ours 3-class) 추가**: Ours(DINOv3-B frozen @512 + focal+aug, 3-class `normal_d3_d4`)의 학습데이터량 안정성을 `train_ratio∈{0.1,0.3,0.5,0.7,0.9}` 신규 run(`experiments/dinov3_base_focal_r{10,30,50,70,90}_normal_d3_d4/`) + 참조점 **r1.0=§6 정본 run**으로 정리. **재학습 없음** — `metrics.json`+`predictions/valid.npz`만 사용(best.pt 미로딩), 동일 원분포 valid(N=1403). 6점 전부 predictions↔manifest **dist_match=PASS**·보고치↔sklearn 재계산 **|Δ|≤0.01 일치**, **r1.0 PR-AUC 0.765·F1 0.774·acc 0.973·AUROC 0.995가 §6와 일치**(동일 run). **결과**: **PR-AUC는 데이터량에 거의 단조 증가·90%↑ 포화**(0.489→0.640→0.680→0.748→0.751→0.765, r0.7~r1.0 +0.017로 수확체감), accuracy/AUROC는 더 일찍 포화(stability 부적합), **F1-macro는 비단조 변동**(r0.7 0.559로 급락하나 PR-AUC는 0.748 — F1이 argmax(0.5) 의존·early-stop은 PR-AUC로 best 선택해 어긋남, d4 N=24 소표본 민감). 안정성 결론은 단조·포화가 뚜렷한 PR-AUC 기준, F1 변동은 소표본·단일시드 노이즈로 해석(병기). 신규: `_workspace/eval/run_stability_eval.py`·`make_stability_fig.py`, 데이터 `_workspace/eval/stability_dinov3.json`, 그림 `report/figures/exp_stability_dinov3.png`. **기존 §1–§7·산출물 전부 불변**, 한계 §8→§9·변경이력 §9→§10으로 번호만 이동(본문 §8 신규 삽입), §7·§6.4 교차참조(§8 한계→§9) 정정.
+- **[이전] §7 Sensitivity(입력 노이즈 강건성, Ours 3-class) 추가**: 학습된 Ours(DINOv3-B frozen @512 + focal+aug, `experiments/dinov3_base_focal_normal_d3_d4/`) best.pt를 **forward 전용 로드(재학습 없음)**, **원분포 valid(N=1403, seed=42)**에서 **정규화 입력 텐서**에 사용자 지정 노이즈 `x_noised = x + torch.rand_like(x)*N_ratio`(N_ratio∈{0.0,0.1,0.2,0.3,0.4,0.5}, manual_seed 고정)를 가산해 PR-AUC(주)/F1/acc/AUROC를 sklearn으로 재계산. **clean(N_ratio=0.0) PR-AUC 0.765·F1 0.772·acc 0.972·AUROC 0.995가 §6 Ours focal+aug 3-class 원분포와 |Δ|≤0.01 일치**(스크립트 assert로 검증). **결과: 매우 강건** — PR-AUC 저하 최대 −0.018(−2.4% @0.3), N_ratio=0.5에서도 −0.013(−1.7%), AUROC 0.995→0.994·acc 0.972→0.963; 단조는 아니며(0.3 저점 후 일부 회복) 저하 폭이 d4 N=24 소표본 변동 스케일이라 미세 우열은 단정 불가, 추세는 노이즈↑→소폭↓. 노이즈를 정규화 입력 텐서에 가한 것이라 실제 픽셀/촬영 노이즈와 분포가 다름을 명시. 신규: `_workspace/eval/run_sensitivity_eval.py`·`make_sensitivity_fig.py`, 데이터 `_workspace/eval/sensitivity_dinov3.json`, 그림 `report/figures/exp_sensitivity_dinov3.png`. **기존 §1–§6B·산출물 전부 불변**, 한계·변경이력 절 번호는 본문 §7 신규 삽입에 따라 한 칸씩 이동(현재 §8 Stability 추가 후 한계=§9·변경이력=§10).
+- **[이전] §3·§3B detection 표에 Ours(DINOv3-B detection) 행 추가(pretrained-frozen 구분 주석)**: `experiments/dinov3_base_detection_singlebox/`(DINOv3 ViT-B/16 frozen @512 + single-box+objectness head, **total 85.84M / trainable 0.200M=head only**)을 §3-1(이미지 단위 검출)·§3-2(국소화)·§3B(균형 valid) 표 하단에 **굵게+구분선으로 추가**. 원분포(§3)는 저장 `predictions/valid.json`에서, 균형(§3B)은 best.pt **forward 전용 로드(가중치 변경 없음)** + `balance_valid=True`(seed=42, img512, fp32)로 재평가해 det_pr_auc/det_roc_auc/presence_recall@0.5/fp_rate@0.5/mAP@0.5/IoU median을 **독립 재계산**. **정합성**: predictions↔manifest N=1403·pos/neg=100/1303 **PASS**, reported↔recomputed 일치(mAP만 AP 보간차 ≤0.05), **sklearn `average_precision_score`/`roc_auc_score` 교차검증 orig·balanced 모두 1e-9 이내 일치**. **결과**: 원분포·균형 둘 다 det PR-AUC=ROC-AUC=**1.0**, presence_recall **1.0**(100/100), fp_rate orig 1/1303(0.08%)·balanced 0/100 → **검출은 baseline 6종과 동급(포화)**; objectness 분리 깨끗(질병 median 0.955 vs 정상 0.017). 국소화 IoU median **0.565**(mAP 0.491)로 baseline 범위(0.57–0.67) 하단. **공정성 주석**: Ours는 자기지도 pretrained frozen+head-only라 from-scratch baseline과 동일조건 아님(params `(frozen)+(tr)` 병기). **⚠️ best-epoch 각주**: det_pr_auc가 ep0부터 1.0 포화→early-stop이 best=ep0 선택→저장 predictions의 **국소화 IoU가 전 epoch 최저(0.565)**, 후반(ep≥28) IoU median ≈0.64까지 상승(train.log/per_epoch). 검출 지표는 ep0부터 포화라 epoch 선택과 무관 — 이 한계를 §3-1/§3-2/§3B 각주에 명시. 신규: `run_ours_detection_eval.py`, 데이터 `ours_detection.json`, verify `verify_dinov3_base_detection_singlebox.md`. 그림 `exp_detection.png`에 Ours 막대(주황 음영)·objectness 중앙값 다이아몬드·IoU 히스토그램(검정 점선) 추가·재생성. **기존 baseline 6 백본 detection 행·수치·해석·그림은 전부 불변**(재실행으로 재계산값 일치 확인).
 - **[이전] §1·§1B 표에 Ours(DINOv3) 행 추가(pretrained-frozen 구분 주석)**: baseline-별 분류 성능표(§1 원분포 §1-1/1-2/1-3, §1B 균형 §1B-1/1B-2/1B-3) 6개 각각에 **Ours 3변형 행을 하단에 굵게+구분선으로 추가**해 한 표에서 직접 비교 가능하게 함 — **Ours: DINOv3-S @256(frozen,CE)**(21.7M/trainable 99K), **Ours: DINOv3-B @512(frozen,CE)**(86.0M/395K), **Ours: DINOv3-B @512(frozen,focal+aug)**(86.0M/395K). 동일 7메트릭 컬럼(params/acc/train·val_loss/recall·precision·f1 macro/AUROC/PR-AUC/best ep), 수치는 `ours_dinov3.json`(=§6 정본)에서 가져와 **predictions에서 sklearn 1건 이상 재계산 대조**(small d3·base d4·focal 3-class 모두 보고치와 완전 일치). **공정성 주석**을 §1 도입부·§1B 도입부에 명기: "baseline 6종은 from-scratch, Ours는 DINOv3 자기지도 pretrained(frozen backbone)+head-only — 사전학습 사용 여부가 달라 동일 조건 비교가 아님"; params(M)도 `(frozen)+(trainable)` 구분 병기(과대비교 방지). 비교 그림 `exp_metrics_table.png`(원분포)·`exp_metrics_balanced.png`(균형)에 **Ours 3종 막대를 baseline과 색/해치 구분(black/red/violet, "pretrained" 표기)+구분선**으로 추가·재생성(`run_eval.py` fig_metrics_table, `make_balanced_fig.py`). **기존 baseline 6 백본 행·수치·해석은 전부 불변**(재실행으로 재계산값 일치 확인). 정본 평가·목표 판정·ablation은 §6/§6B 유지.
 - **[이전] Ablation(aug×focal, gamma sweep) + 하이퍼파라미터 표 추가(§6B, 부록 A)**: dinov3_base 3-class에서 backbone·head·해상도·optimizer·trainable(395k)·seed 고정, **loss(CE/focal-γ)와 aug(default/strong)만** 바꾼 ablation 4 run(augonly·focalonly·focalg1·focalg3) + 참조 2개(base, focal+aug)를 추가. **2×2 기여 분해**(aug 효과 PR +0.011·F1 +0.018, focal 단독 PR −0.009·F1 −0.015, **상호작용 PR +0.018·F1 +0.022** → focal은 strong aug와 결합 시에만 이득; **강한 증강이 주 동력·조합 시너지** 확인), **gamma 스윕**(strong aug 고정 γ1/γ2/γ3: PR-AUC는 γ↑ 단조 개선 γ3 0.769 최고, F1·d4 precision은 γ↓ 유리 γ1 0.782/0.412 최고 — 곡선 교차), **d4 precision 0.339→0.39~0.41**(strong-aug 계열)·d4 N=24 Wilson CI 병기(전 run CI 중첩 → 단일 시드·소표본이라 개별 우열 단정 금지, 방향성만). 6 run predictions↔manifest dist_match=PASS, sklearn 재계산↔보고 완전 일치. 신규: `run_ablation_eval.py`·`make_ablation_fig.py`, `ablation_dinov3.json`, verify 4종, 그림 `exp_ablation_dinov3.png`(2×2+기여분해+gamma). **부록 A**에 baseline 6백본·Ours(small/base)·focal·ablation 전 주요 실험의 config.snapshot 추출 하이퍼파라미터 표를 추가. §6/§7 등 기존 내용 전부 보존.
 - **[현재 갱신] Ours+ 강한 증강+focal loss 추가·평가(§6)**: Ours+(base@512)와 **backbone·head·해상도·trainable(395k) 전부 동일**하되 학습만 **강한 증강(aug=strong)+focal loss(gamma=2, class_weights=from_meta)**로 바꾼 개선판 3 run(`experiments/dinov3_base_focal_{normal_vs_d3,normal_vs_d4,normal_d3_d4}`, img512)을 추가해 small·base-CE·baseline 최고와 4-way 비교. 원분포·균형 valid 둘 다 7메트릭+PR-AUC+per-class(d3/d4) recall·precision·confusion을 **predictions에서 sklearn 독립 재계산**(보고치와 완전 일치)하고, 균형은 best.pt 로드해 `balance_valid=True`(seed=42, **img_size=512**)로 forward 재평가(가중치 변경 없음). 정합성: 3세팅 predictions↔manifest **dist_match=PASS**, reported↔recomputed 완전 일치, sklearn 교차검증 일치. **결과(원분포)**: 3-class PR-AUC **0.745(base-CE)→0.765(focal+aug)**, F1 **0.750→0.774**; **d4 precision 0.339→0.396**(정상→d4 오분류 16→9장↓, d4 recall 0.875 불변); d4(2-class) F1 0.866→0.919. **+20% 재판정 — PR-AUC는 baseline 0.570 대비 +34.1%로 목표(0.684) 가장 견고히 달성, F1-macro는 +9.2%로 base-CE(+5.8%)보다 개선됐으나 절대 목표(0.851)에는 미달**(d4 precision 병목 완화되었으나 미해소). **해석 단서: aug+focal 두 변수를 동시에 변경했으므로 개선의 기여 분리 불가(단변수 ablation 후속 필요); from_meta 가중치는 균형 train 로더 때문에 전부 1.0으로 해소되어 focal의 작동 기제는 gamma(hard-example 집중)**임을 명시. 신규 스크립트 `run_ours_focal_eval.py`(small+base-CE+focal 병합 dump), 그림 스크립트 `make_ours_focal_fig.py`, 데이터 `ours_dinov3.json`(small+base-CE+focal 병합, uplift_focal·goal_verdict_3class_focal·ce_to_focal_improvement 추가), verify 3종(`verify_dinov3_base_focal_*.md`, per-class CE↔focal·Wilson CI·ce→focal delta 포함), 신규 그림 `exp_ours_focal.png`(baseline/small/base-CE/focal+aug 4-way, +20% 목표선). 기존 §6 표·해석·산출물 전부 보존·확장, baseline 6 백본(§1–5, 7) 불변.
@@ -565,6 +636,14 @@ design-notes 기준: 3-class 원분포 baseline 최고 **PR-AUC 0.570(DenseNet12
 | **Ours+ focal+aug 평가 스크립트(predictions 재계산 + best.pt 균형 재평가 + 병합)** | `_workspace/eval/run_ours_focal_eval.py` |
 | **Ours+ focal+aug vs base-CE vs small vs baseline 비교 그림(4-way, 20% 목표선)** | `report/figures/exp_ours_focal.png` |
 | **Ours+ focal+aug 비교 그림 스크립트** | `_workspace/eval/make_ours_focal_fig.py` |
+| **§7 입력 노이즈 sensitivity 데이터(N_ratio별 PR-AUC/F1/acc/AUROC + clean 대비 저하 + §6 대조)** | `_workspace/eval/sensitivity_dinov3.json` |
+| **§7 입력 노이즈 sensitivity 평가 스크립트(best.pt forward 전용, 입력 텐서 노이즈)** | `_workspace/eval/run_sensitivity_eval.py` |
+| **§7 입력 노이즈 sensitivity 그림(N_ratio vs PR-AUC/F1 + acc/AUROC)** | `report/figures/exp_sensitivity_dinov3.png` |
+| **§7 sensitivity 그림 스크립트** | `_workspace/eval/make_sensitivity_fig.py` |
+| **§8 stability(train_ratio sweep) 데이터(6점 PR-AUC/F1/acc/AUROC + train_counts + boundary/재계산 대조)** | `_workspace/eval/stability_dinov3.json` |
+| **§8 stability 평가 스크립트(predictions+metrics 재계산, 재학습 없음)** | `_workspace/eval/run_stability_eval.py` |
+| **§8 stability 그림(train_ratio vs PR-AUC/F1 + train 표본수 보조축 + acc/AUROC)** | `report/figures/exp_stability_dinov3.png` |
+| **§8 stability 그림 스크립트** | `_workspace/eval/make_stability_fig.py` |
 | **Ours(small) 평가 스크립트(predictions 재계산 + best.pt 균형 재평가)** | `_workspace/eval/run_ours_eval.py` |
 | **Ours+(base@512) 평가 스크립트(predictions 재계산 + best.pt 균형 재평가 + small 병합)** | `_workspace/eval/run_ours_plus_eval.py` |
 | **Ours/Ours+ vs baseline 최고 비교 그림(PR-AUC·F1, 원분포/균형, 3-way, 20% 목표선)** | `report/figures/exp_ours_dinov3.png` |

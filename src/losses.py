@@ -50,6 +50,7 @@ class FocalLoss(nn.Module):
         label_smoothing: float = 0.0,
         reduction: str = "mean",
     ) -> None:
+        """FocalLoss 설정(gamma, 클래스 가중 weight=alpha, label_smoothing)."""
         super().__init__()
         if gamma < 0:
             raise ValueError(f"gamma must be >= 0, got {gamma}")
@@ -69,6 +70,7 @@ class FocalLoss(nn.Module):
             self.weight = None
 
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        """logits/targets에 대해 FL=(1-p_t)^gamma·CE 계산(log_softmax로 수치 안정)."""
         if logits.dim() != 2:
             raise ValueError(
                 f"expected logits [B, C], got shape {tuple(logits.shape)}")
@@ -174,6 +176,7 @@ if __name__ == "__main__":
     torch.manual_seed(0)
 
     def _check(num_classes: int, gamma: float, weighted: bool, ls: float):
+        """내부 sanity check 헬퍼."""
         B = 16
         logits = torch.randn(B, num_classes, requires_grad=True)
         targets = torch.randint(0, num_classes, (B,))

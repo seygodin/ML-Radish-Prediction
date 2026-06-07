@@ -13,6 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def listdir(d):
+    """디렉토리 파일 목록(없으면 빈 리스트) — 라벨↔이미지 매칭 검증용."""
     p = os.path.join(HERE, d)
     return os.listdir(p) if os.path.isdir(p) else []
 

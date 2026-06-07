@@ -89,6 +89,7 @@ nrm = df[df.klass == "normal"]
 
 
 def vc(s):
+    """Series의 값별 개수를 정렬된 dict로(JSON 직렬화용)."""
     return {str(k): int(v) for k, v in s.value_counts().sort_index().items()}
 
 
@@ -131,6 +132,7 @@ C = {"normal": "#4C72B0", "disease": "#C44E52", 3: "#DD8452", 4: "#55A868"}
 
 
 def save(fig, name):
+    """matplotlib figure를 tight_layout으로 PNG 저장 후 close."""
     fig.tight_layout()
     fig.savefig(os.path.join(FIG, name), dpi=120)
     plt.close(fig)
@@ -225,6 +227,7 @@ save(fig, "08_date_timeline.png")
 
 # montage helpers
 def montage(items, name, title, rows_n=3, cols_n=4, draw_box=False):
+    """이미지(선택적 bbox)들을 그리드로 모아 한 장의 샘플 몽타주로 저장."""
     fig, axes = plt.subplots(rows_n, cols_n, figsize=(cols_n * 2.6, rows_n * 2.6))
     for ax in axes.ravel():
         ax.axis("off")
@@ -245,6 +248,7 @@ def montage(items, name, title, rows_n=3, cols_n=4, draw_box=False):
 
 
 def collect(split, klass, n, code=None):
+    """split/클래스(코드)별 (이미지경로, 박스) 표본을 n개까지 결정적으로 수집."""
     p = os.path.join(DATA, LABEL[(split, klass)])
     idx, imdir = img_index(split, klass)
     out = []

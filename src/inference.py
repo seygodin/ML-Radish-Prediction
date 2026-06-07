@@ -47,6 +47,7 @@ SETTING_CLASS_NAMES = {
 
 @dataclass
 class Pipeline:
+    """데모용 로드된 한 파이프라인(모델+메타). public()으로 JSON 직렬화."""
     id: str
     arch: str
     task: str  # "classification" | "detection"
@@ -58,6 +59,7 @@ class Pipeline:
     model: torch.nn.Module = None  # loaded lazily into registry
 
     def public(self) -> dict:
+        """Pipeline의 외부 노출용 메타(id/arch/task/지표 등) dict."""
         return {
             "id": self.id,
             "arch": self.arch,
@@ -77,6 +79,7 @@ _REGISTRY: dict[str, Pipeline] = {}
 # Registry loading
 # ---------------------------------------------------------------------------
 def _load_one(name: str) -> Pipeline:
+    """experiments/<name>의 config.snapshot+best.pt로 모델을 만들어 Pipeline 구성."""
     exp_dir = os.path.join(EXPERIMENTS_DIR, name)
     with open(os.path.join(exp_dir, "config.snapshot")) as f:
         cfg = json.load(f)
@@ -147,11 +150,13 @@ def load_registry() -> dict[str, Pipeline]:
 
 
 def list_pipelines() -> list[dict]:
+    """로드된 전 파이프라인의 공개 메타 목록 반환(/api/pipelines)."""
     reg = load_registry()
     return [reg[k].public() for k in sorted(reg)]
 
 
 def _resolve_ids(pipeline_ids) -> list[str]:
+    """요청의 pipelines 인자('all' 또는 id 리스트)를 실제 파이프라인 id로 해석."""
     reg = load_registry()
     if pipeline_ids in (None, "all", ["all"]):
         return sorted(reg)
@@ -165,6 +170,7 @@ def _resolve_ids(pipeline_ids) -> list[str]:
 # pred box [0,1] is inverse-transformed back to ORIGINAL image coords.
 # ---------------------------------------------------------------------------
 def _detection_input(pil: Image.Image, img_size: int) -> torch.Tensor:
+    """PIL을 detection 입력(img_size 정사각 resize+ImageNet 정규화) 텐서로 변환."""
     img = pil.resize((img_size, img_size), Image.BILINEAR)
     t = TF.to_tensor(img)
     t = TF.normalize(t, IMAGENET_MEAN, IMAGENET_STD)

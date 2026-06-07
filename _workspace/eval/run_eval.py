@@ -77,6 +77,7 @@ def pr_auc(y_true, scores):
 
 
 def pr_curve(y_true, scores, n=200):
+    """precision-recall 곡선의 점들을 계산."""
     y_true = np.asarray(y_true)
     scores = np.asarray(scores)
     order = np.argsort(-scores)
@@ -90,6 +91,7 @@ def pr_curve(y_true, scores, n=200):
 
 
 def confusion(y_true, y_pred, k):
+    """혼동행렬(정답×예측) 계산."""
     cm = np.zeros((k, k), dtype=int)
     for t, p in zip(y_true, y_pred):
         cm[int(t), int(p)] += 1
@@ -97,6 +99,7 @@ def confusion(y_true, y_pred, k):
 
 
 def per_class_f1(cm):
+    """클래스별 F1 계산."""
     k = cm.shape[0]
     f1s = []
     for c in range(k):
@@ -111,6 +114,7 @@ def per_class_f1(cm):
 
 
 def wilson_ci(k, n, z=1.96):
+    """이항 비율의 Wilson 95% 신뢰구간(저·고) — 소표본 지표에 CI 병기용."""
     if n == 0:
         return (float("nan"), float("nan"))
     p = k / n
@@ -185,6 +189,7 @@ def best_epoch_losses(per_epoch, best_epoch):
 
 
 def iou_xyxy(a, b):
+    """두 xyxy 박스의 IoU(교집합/합집합)."""
     ix0 = max(a[0], b[0])
     iy0 = max(a[1], b[1])
     ix1 = min(a[2], b[2])
@@ -249,6 +254,7 @@ PARAMS_M = compute_params_m()
 
 
 def manifest_valid_label_dist(setting):
+    """manifest의 valid 라벨 분포 반환(정합성 교차검증용)."""
     lab = "label_" + setting
     vv = mcls_valid[mcls_valid[lab] >= 0]
     return vv[lab].value_counts().sort_index().to_dict(), len(vv)
@@ -261,6 +267,7 @@ cls_results = {}  # name -> dict
 
 
 def eval_classification(arch, setting):
+    """한 분류 run의 predictions에서 지표를 재계산해 dict 반환."""
     name = f"{arch}_{setting}"
     d = json.load(open(EXP / name / "metrics.json"))
     z = np.load(EXP / name / "predictions" / "valid.npz", allow_pickle=True)
@@ -418,6 +425,7 @@ det_results = {}
 
 
 def eval_detection(arch):
+    """한 detection run의 predictions에서 검출/국소화 지표를 재계산."""
     name = f"{arch}_detection_singlebox"
     d = json.load(open(EXP / name / "metrics.json"))
     pj = json.load(open(EXP / name / "predictions" / "valid.json"))

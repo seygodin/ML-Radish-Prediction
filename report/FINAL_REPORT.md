@@ -33,7 +33,8 @@
 2. **Ours = DINOv3(frozen) + 경량 2-layer head 전이**: 자기지도 사전학습 ViT를 완전 동결(no forgetting)하고 소수 파라미터(head)만 학습. 가장 어려운 3-class 원분포 PR-AUC에서 baseline 최고 대비 **+34%**(0.570 → 0.765).
 3. **detection objectness collapse 발견·수정**: 초기 detection은 정상을 음성으로 다루지 않아 objectness가 전 이미지에서 ~1.0으로 붕괴 → 데이터 로더·지표 처리를 수정해 정상=음성으로 재학습, 분리도를 정량 확인.
 4. **강한 증강 × focal ablation**: focal+aug 개선을 2×2 단변수 ablation으로 분해해 기여를 정직하게 분리(강한 증강이 주 동력, focal은 증강과 결합 시에만 이득).
-5. **다중 파이프라인 동시 비교 + 전체 재현 절차**: baseline ↔ Ours를 한 표/그림에서 비교하고, 정합성 교차검증·재현 스크립트를 산출물로 제공.
+5. **Ours 견고성·데이터 효율 분석**: 입력 노이즈 sensitivity(§3.7)와 train-ratio stability(§3.8)로 frozen 전이 모델의 강건성·데이터 스케일링을 정량화.
+6. **다중 파이프라인 동시 비교 + 전체 재현 절차**: baseline ↔ Ours를 한 표/그림에서 비교하고, 정합성 교차검증·재현 스크립트(+ 단일 노트북·FastAPI 데모/VQA)를 산출물로 제공.
 
 ---
 
@@ -99,6 +100,43 @@
 - **성능 최대화 경로**: S → B → @512 → strong aug + focal.
 
 관련 그림: `![](figures/exp_ours_dinov3.png)`(small/base/baseline 3-way, +20% 목표선), `![](figures/exp_ours_focal.png)`(baseline/small/base-CE/focal+aug 4-way) — 출처 `EXPERIMENTS.md` §6.
+
+### 2.6 Ours 알고리즘 (수도코드)
+
+핵심은 **동결된 DINOv3 백본 + 경량 head만 학습**이다. 학습 시 backbone은 `requires_grad=False`·eval 모드라 gradient가 흐르지 않아 사전학습 표현이 보존되고(no forgetting), optimizer에는 head 파라미터만 전달된다.
+
+```
+# ---------- 구성 ----------
+Backbone B  ← DINOv3 ViT (S/16@256 또는 B/16@512), self-supervised pretrained
+            freeze(B): 모든 파라미터 requires_grad = False, B.eval()  # 통계·가중치 고정
+Head H      ← Linear(feat_dim → hidden) → GELU → Dropout(0.1) → Linear(hidden → C)
+              # 분류: C = num_classes(2 또는 3)
+optimizer   ← AdamW( params = [p for p in H.parameters()],  lr=1e-3, wd=0.05 )  # head만
+loss_fn     ← FocalLoss(γ=2, α=class_weights)   # 또는 CrossEntropy
+augment     ← strong( RandomResizedCrop, H/V-flip, rotation, ColorJitter,
+                       TrivialAugmentWide, RandomErasing )   # train만, focal+aug 변형
+
+# ---------- 학습 (head-probe) ----------
+for epoch in 1..E:                          # E=30(S)/40(B), cosine+warmup
+  for (img, y) in train_loader:             # train은 클래스 균형 다운샘플
+    x      = augment(img); x = normalize(x)
+    with no_grad():   feat = B.forward_features(x)   # (Batch, feat_dim) pooled, 동결
+    logits = H(feat)
+    loss   = loss_fn(logits, y)
+    loss.backward();  optimizer.step();  optimizer.zero_grad()   # H만 갱신
+  evaluate(valid);  keep best by PR-AUC(분류)/det_pr_auc(검출)   # early-stop
+
+# ---------- 추론 ----------
+feat = B.forward_features(normalize(img));  logits = H(feat)
+pred = softmax(logits)                       # 분류: 클래스 확률
+
+# ---------- 검출 변형(동일 동결 백본) ----------
+Head_det ← Linear(feat_dim → 4) (box xyxy∈[0,1]) ⊕ Linear(feat_dim → 1) (objectness)
+loss_det ← GIoU(2)+L1(5) (양성 박스만) + BCE(1) (objectness, 정상=음성)
+# 추론: pred_box, p_obj = Head_det(B.forward_features(x)); is_disease = p_obj > 0.5
+```
+
+> 동결+head-only이므로 학습 파라미터는 분류 head ~99k(S)/395k(B), 검출 head ~0.2M으로 전체의 0.2~0.5%에 불과하다. 이 구조가 소표본·단일시즌 데이터에서 from-scratch 대비 큰 이득(3-class PR-AUC +34%)과 입력 노이즈 강건성(§3.7), 데이터량에 대한 안정적 스케일링(§3.8)의 근거다.
 
 ---
 
@@ -224,7 +262,43 @@ baseline 종합 우열(PR-AUC 주지표): **DenseNet121 ≈ ResNet50 ≳ Efficie
 
 관련 그림: `![](figures/exp_ablation_dinov3.png)`(2×2 막대 + 기여분해 + gamma 곡선) — 출처 `EXPERIMENTS.md` §6B.
 
-### 3.7 핵심 수치 정합성 대조 (QA)
+### 3.7 Sensitivity — 입력 노이즈 강건성 (Ours, 3-class)
+
+(출처: `EXPERIMENTS.md` §7, `sensitivity_dinov3.json`) 학습된 Ours(focal+aug, 3-class) `best.pt`를 **재학습 없이** 로드해, 정규화된 모델 입력 텐서에 노이즈 `x ← x + torch.rand_like(x)·N_ratio`(rand ~ U[0,1), seed 고정)를 가하고 원분포 valid(N=1403)에서 재평가했다.
+
+| N_ratio | PR-AUC | F1-macro | accuracy | AUROC | ΔPR-AUC |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0.0 (clean) | 0.765 | 0.772 | 0.972 | 0.995 | — |
+| 0.1 | 0.762 | 0.781 | 0.973 | 0.995 | −0.4% |
+| 0.2 | 0.748 | 0.773 | 0.969 | 0.994 | −2.3% |
+| 0.3 | 0.747 | 0.754 | 0.964 | 0.994 | −2.4% |
+| 0.4 | 0.755 | 0.752 | 0.964 | 0.994 | −1.3% |
+| 0.5 | 0.752 | 0.752 | 0.963 | 0.994 | −1.7% |
+
+- **매우 강건**: N_ratio 0.5까지 PR-AUC 저하 최대 −2.4%, AUROC는 0.995→0.994로 거의 불변. clean(0.0)은 §3.2 Ours focal+aug(PR-AUC 0.765)와 일치(검증됨).
+- 강건성의 출처는 **frozen DINOv3 백본 + head-only** 구조 — 입력 텐서 가산 노이즈가 깊은 사전학습 표현을 크게 교란하지 못한다. 저하가 단조가 아닌 것(0.3 저점 후 0.4 회복)은 d4 N=24 소표본 변동 스케일이라 N_ratio 간 미세 우열은 단정 불가. (정규화 입력 텐서에 가산한 노이즈로, 실제 픽셀/촬영 노이즈와 분포가 다름은 명시한다.)
+
+관련 그림: `![](figures/exp_sensitivity_dinov3.png)`.
+
+### 3.8 Stability — train ratio sweep (Ours, 3-class)
+
+(출처: `EXPERIMENTS.md` §8, `stability_dinov3.json`) train 데이터 비율 train_ratio ∈ {0.1,…,0.9}로 Ours(focal+aug, 3-class)를 재학습(클래스 stratified 축소, 균형 유지·seed 고정)하고 동일 원분포 valid로 평가했다. train_ratio=1.0은 §3.2의 기존 run이 참조점.
+
+| train_ratio | train 표본/클래스 | PR-AUC | F1-macro | accuracy | AUROC |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| 0.1 | 23 | 0.489 | 0.316 | 0.701 | 0.956 |
+| 0.3 | 68 | 0.640 | 0.661 | 0.947 | 0.989 |
+| 0.5 | 114 | 0.680 | 0.698 | 0.955 | 0.992 |
+| 0.7 | 159 | 0.748 | 0.559 | 0.939 | 0.995 |
+| 0.9 | 204 | 0.751 | 0.734 | 0.963 | 0.995 |
+| 1.0(참조) | 227 | **0.765** | **0.774** | 0.973 | 0.995 |
+
+- **PR-AUC는 데이터량에 거의 단조 증가하고 90%↑에서 포화**(0.489→0.765, r0.7~1.0 +0.017로 수확체감) — 안정적 스케일링.
+- **F1-macro는 비단조**(r0.7에서 0.559 급락): argmax(0.5) 의존 + d4 N=24 소표본 민감 + PR-AUC 기반 early-stop과의 어긋남 때문. 소수 클래스 절대 표본 수가 안정성의 핵심 제약임을 다시 보여준다.
+
+관련 그림: `![](figures/exp_stability_dinov3.png)`.
+
+### 3.9 핵심 수치 정합성 대조 (QA)
 
 본 보고서 작성 시 핵심 수치 3개를 소스 JSON과 직접 대조해 **완전 일치**를 확인했다(`ours_dinov3.json`, `ablation_dinov3.json`, `ours_detection.json` 재조회):
 - **Ours+ focal+aug 3-class 원분포 PR-AUC = 0.7647**, F1-macro = 0.7743, baseline 대비 PR 상대 **+34.09%** / F1 +9.23%, 목표 판정 `pr_auc_met=true, f1_macro_met=false` — `ours_dinov3.json`과 일치.
@@ -241,7 +315,8 @@ baseline 종합 우열(PR-AUC 주지표): **DenseNet121 ≈ ResNet50 ≳ Efficie
 - **d4 소표본 병목(F1 절대 목표·우열 판정의 본질적 한계)**: valid disease_4 = 24장. base-CE 3-class confusion `[[1286,1,16],[1,50,25],[0,3,21]]`에서 d4 recall은 0.875로 양호하나 정상·d3가 d4로 새는 **d4 precision 0.339**가 macro-F1을 0.750에 묶는다. focal+aug가 정상→d4 오분류를 16→9장으로 줄여 d4 precision 0.339→0.396로 완화했으나, 95% CI가 0.276–0.531로 여전히 넓고 낮아 **F1 병목은 완화될 뿐 해소되지 않는다**. 이것이 PR-AUC로는 목표 초과·argmax-F1으로는 미달인 직접 원인이며, 모든 d4 관련 단일값 우열을 CI와 함께 봐야 하는 이유다.
 - **거친 bbox·objectness 의미**: GT가 작물 영역 통째(중앙·≈프레임 절반)라 detection은 미세 병변 핀포인트가 아닌 작물 영역 학습에 가깝다. 따라서 **검출(있는지)은 강하고**(det PR-AUC 포화), **국소화(어디인지)는 상한**(IoU 0.57–0.67, mAP 0.46–0.60)이 본질적이다. mAP는 국소화 hit-rate에 묶여 det_pr_auc와 분리 해석해야 한다.
 - **detection best-epoch 선택 이슈**: Ours detection은 det_pr_auc가 ep0부터 1.0 포화라 best=ep0이 선택돼 저장 predictions의 국소화 IoU가 전 epoch 최저(0.565)다. 검출 지표는 무관하나, 국소화 보고에는 이 한계를 명시했다(후반 ep ≈0.64).
-- **한계·향후 과제**: (1) baseline pretrained 미로딩으로 절대 상한이 낮음(공정 비교 시 pretrained 병행 필요), (2) **부분 unfreeze 저-LR**로 도메인 적응 여지, (3) **d4 데이터 확충/오버샘플**·미세 병변 라벨 보강으로 F1 절대 목표·국소화 개선, (4) 다시즌 데이터로 외부 일반화 검증.
+- **견고성·데이터 효율(§3.7~§3.8)**: frozen 전이 구조 덕에 입력 노이즈에 강건하고(N_ratio 0.5까지 PR-AUC 저하 ≤2.4%), PR-AUC가 train 데이터량에 단조 증가·90%↑ 포화로 견조하게 스케일한다. 다만 F1-macro의 안정성은 다시 **소수 클래스(d4 N=24) 절대 표본 수**에 제약된다(train_ratio가 늘어도 출렁임).
+- **한계·향후 과제**: (1) baseline pretrained 미로딩으로 절대 상한이 낮음(공정 비교 시 pretrained 병행 필요), (2) **부분 unfreeze 저-LR**로 도메인 적응 여지, (3) **d4 데이터 확충/오버샘플**·미세 병변 라벨 보강으로 F1 절대 목표·국소화·안정성 개선, (4) 다시즌 데이터로 외부 일반화 검증.
 
 ---
 
@@ -250,12 +325,13 @@ baseline 종합 우열(PR-AUC 주지표): **DenseNet121 ≈ ResNet50 ≳ Efficie
 - **DINOv3(frozen) + 경량 2-layer head 전이**는 from-scratch baseline 대비, 가장 어려운 3-class 원분포에서 **PR-AUC 0.570 → 0.765(+34%)** 로 주지표 목표(+20%)를 견고히 달성했다. 사전학습 표현을 동결로 보존(no forgetting)하고 소수 파라미터(head 99k/395k)만 학습해 효율적이고 재현성이 높다.
 - **검출(질병 유무)** 은 baseline·Ours 모두 사실상 포화(det PR-AUC 0.997–1.000, 정상 오경보 0.08–0.6%)했으나, **국소화는 거친 GT 특성상 상한**(IoU 0.57–0.67)이 분명하다.
 - **개선의 정직한 귀속**: 전이가 주 동력, 강한 증강이 다음, focal은 증강과 결합 시에만 이득(조합 시너지). **3-class F1 절대 목표(0.851)는 d4 valid 24장 precision 병목으로 미달**이며, 이는 데이터 한계지 방법 한계가 아니다.
+- **견고성·데이터 효율**: Ours는 입력 노이즈에 강건하고(PR-AUC 저하 ≤2.4%, §3.7) train 데이터량에 PR-AUC가 단조 증가·90%↑ 포화(§3.8)해, 적은 데이터·잡음 환경에서도 안정적이다.
 - **실용 권고**: **질병 유무 스크리닝**에는 DINOv3 frozen + head 전이가 효율적·강력하므로 우선 권장한다. **3-class 세분화와 정밀 국소화**는 d4 데이터 확충·미세 병변 라벨 보강(필요 시 분류 + CAM 보조, 부분 unfreeze)이 선행되어야 한다.
 
 ---
 
 ### 부록: 산출물·재현
 
-- 정합성 검증: `_workspace/eval/verify_<name>.md`(24 baseline + Ours/ablation 별도). 평가 데이터: `_workspace/eval/ours_dinov3.json`, `ablation_dinov3.json`, `ours_detection.json`, `balanced_valid.json`, `balanced_valid_detection.json`, `summary.json`.
-- 그림: `report/figures/`(분류 `exp_metrics_table.png`/`exp_metrics_balanced.png`/`exp_cls_bars.png`/`exp_pr_curves.png`/`exp_confusion.png`, detection `exp_detection.png`/`exp_detection_balanced.png`, Ours `exp_ours_dinov3.png`/`exp_ours_focal.png`, ablation `exp_ablation_dinov3.png`, 곡선 `training_curves.png` 및 run별 `curves_*.png`).
+- 정합성 검증: `_workspace/eval/verify_<name>.md`(24 baseline + Ours/ablation 별도). 평가 데이터: `_workspace/eval/ours_dinov3.json`, `ablation_dinov3.json`, `ours_detection.json`, `balanced_valid.json`, `balanced_valid_detection.json`, `sensitivity_dinov3.json`, `stability_dinov3.json`, `summary.json`. 추가 분석 스크립트: `run_sensitivity_eval.py`, `run_stability_eval.py`.
+- 그림: `report/figures/`(분류 `exp_metrics_table.png`/`exp_metrics_balanced.png`/`exp_cls_bars.png`/`exp_pr_curves.png`/`exp_confusion.png`, detection `exp_detection.png`/`exp_detection_balanced.png`, Ours `exp_ours_dinov3.png`/`exp_ours_focal.png`, ablation `exp_ablation_dinov3.png`, sensitivity `exp_sensitivity_dinov3.png`, stability `exp_stability_dinov3.png`, 곡선 `training_curves.png` 및 run별 `curves_*.png`).
 - 상세 표·해석·변경 이력: `report/EXPERIMENTS.md`(메트릭 정의·§0 정합성·§1/§1B 분류·§3/§3B detection·§6 Ours·§6B ablation·부록 A). 데이터 분석: `report/REPORT.md`, `report/stats.json`. 모델 설계: `_workspace/specs/design_notes.md`.

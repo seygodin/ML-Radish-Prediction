@@ -84,6 +84,7 @@ def forward_collect(model, loader, device, img_size, with_obj):
 
 
 def main() -> int:
+    """스크립트 진입점: 예측/체크포인트 로드 → 지표 재계산 → JSON·그림·리포트 산출."""
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     batch_size = 16
     num_workers = 8

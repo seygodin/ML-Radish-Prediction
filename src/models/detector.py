@@ -135,6 +135,7 @@ class SingleBoxDetector(nn.Module):
         dropout: float = 0.1,
         with_objectness: bool = True,
     ):
+        """동결 백본 + 단일박스 회귀(+objectness) 헤드 구성(헤드만 학습 대상)."""
         super().__init__()
         self.backbone = backbone
         self.with_objectness = with_objectness
@@ -148,6 +149,7 @@ class SingleBoxDetector(nn.Module):
         self.obj_head = nn.Linear(hidden_dim, 1) if with_objectness else None
 
     def forward(self, images: torch.Tensor):
+        """백본 풀링특징 → 박스[B,4] xyxy∈[0,1] (+ with_objectness면 objectness logit) 반환."""
         feats = self.backbone.forward_features(images)  # (B, C) pooled
         h = self.neck(feats)
         pred_boxes = torch.sigmoid(self.box_head(h))  # (B, 4) in [0,1], xyxy

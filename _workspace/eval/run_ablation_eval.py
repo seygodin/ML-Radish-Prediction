@@ -57,6 +57,7 @@ VERIFY_RUNS = [
 
 
 def wilson_ci(k, n, z=1.96):
+    """이항 비율의 Wilson 95% 신뢰구간(저·고) — 소표본 지표에 CI 병기용."""
     if n == 0:
         return (float("nan"), float("nan"))
     p = k / n
@@ -67,6 +68,7 @@ def wilson_ci(k, n, z=1.96):
 
 
 def metrics_from_probs(probs, labels, num_classes):
+    """확률·정답에서 분류 지표(PR-AUC/F1/recall/precision/accuracy/AUROC)를 재계산."""
     probs = np.asarray(probs, dtype=np.float64)
     labels = np.asarray(labels, dtype=np.int64)
     preds = probs.argmax(axis=1)
@@ -92,6 +94,7 @@ def metrics_from_probs(probs, labels, num_classes):
 
 
 def per_class(cm, num_classes):
+    """클래스별 precision/recall 계산."""
     cm = np.asarray(cm, dtype=np.float64)
     out = {}
     for c in range(num_classes):

@@ -53,6 +53,7 @@ SEED = 42
 
 # ---- metric primitives copied verbatim from run_eval.py (same conventions) ----
 def pr_auc(y_true, scores):
+    """PR-AUC(average precision)를 계산."""
     y_true = np.asarray(y_true)
     scores = np.asarray(scores)
     order = np.argsort(-scores)
@@ -73,6 +74,7 @@ def pr_auc(y_true, scores):
 
 
 def roc_auc(y_true, scores):
+    """ROC-AUC를 계산."""
     y_true = np.asarray(y_true).astype(int)
     scores = np.asarray(scores, dtype=float)
     n_pos = int(y_true.sum())
@@ -95,6 +97,7 @@ def roc_auc(y_true, scores):
 
 
 def wilson_ci(k, n, z=1.96):
+    """이항 비율의 Wilson 95% 신뢰구간(저·고) — 소표본 지표에 CI 병기용."""
     if n == 0:
         return (float("nan"), float("nan"))
     p = k / n
@@ -105,6 +108,7 @@ def wilson_ci(k, n, z=1.96):
 
 
 def iou_xyxy(a, b):
+    """두 xyxy 박스의 IoU(교집합/합집합)."""
     ix0 = max(a[0], b[0]); iy0 = max(a[1], b[1])
     ix1 = min(a[2], b[2]); iy1 = min(a[3], b[3])
     iw = max(0.0, ix1 - ix0); ih = max(0.0, iy1 - iy0)
@@ -187,6 +191,7 @@ def detection_block(pred_boxes, scores, gt_boxes, is_pos):
 
 @torch.no_grad()
 def forward_balanced(model, loader, device, img_size):
+    """균형 valid 로더로 모델을 forward해 예측을 수집."""
     model.eval()
     pred_list, score_list, gt_list, pos_list = [], [], [], []
     sz = float(img_size)
@@ -208,6 +213,7 @@ def forward_balanced(model, loader, device, img_size):
 
 
 def main() -> int:
+    """스크립트 진입점: 예측/체크포인트 로드 → 지표 재계산 → JSON·그림·리포트 산출."""
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     run_dir = EXP / NAME
     mj = json.loads((run_dir / "metrics.json").read_text())

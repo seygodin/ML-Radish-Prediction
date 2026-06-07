@@ -107,6 +107,7 @@ def parse_label(json_path: str, image_path: str) -> dict:
 # ----------------------------------------------------------------------------
 @dataclass
 class Sample:
+    """한 샘플의 메타데이터(경로·클래스·disease 코드·risk·실제 크기 기준 bbox). manifest 행과 1:1."""
     split: str
     image_path: str
     label_path: str
@@ -124,6 +125,7 @@ class Sample:
 
 
 def _clip_box(box, w, h):
+    """bbox(xyxy)를 이미지 경계 [0,w]/[0,h]로 클립하고 좌표 역전 시 정렬해 반환."""
     x0, y0, x1, y1 = box
     x0 = max(0.0, min(x0, w))
     y0 = max(0.0, min(y0, h))
@@ -137,6 +139,7 @@ def _clip_box(box, w, h):
 
 
 def _scan_normal(split: str, skipped: list) -> list[Sample]:
+    """split의 정상 라벨/이미지를 스캔해 Sample 목록 생성(매칭 실패·zero-size는 skip 로그)."""
     img_dir = NORMAL_IMG_DIR[split]
     lbl_dir = NORMAL_LBL_DIR[split]
     out = []
@@ -169,6 +172,7 @@ def _scan_normal(split: str, skipped: list) -> list[Sample]:
 
 
 def _scan_disease(split: str, disease_code: int, skipped: list) -> list[Sample]:
+    """split·disease_code의 질병 라벨/이미지를 스캔(빈/퇴화 bbox는 detection 안전성 위해 skip)."""
     img_dir = by_disease_dir(split, disease_code, "images")
     lbl_dir = by_disease_dir(split, disease_code, "labels")
     out = []
@@ -226,6 +230,7 @@ MANIFEST_CLS = os.path.join(
 
 
 def _catalog_from_manifest(path: str) -> Optional[Catalog]:
+    """동결된 manifest CSV에서 Catalog를 복원(이미지 재스캔 없이 sub-second). 누락/무효 시 None."""
     import csv
     try:
         fh = open(path, "r", encoding="utf-8", newline="")

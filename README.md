@@ -26,10 +26,16 @@ AI-Hub 스타일 무(radish) 작물 이미지에서 **정상(normal) vs 질병(d
 
 → 가장 어려운 3-class에서 **Ours가 baseline 최고 대비 PR-AUC +34%**. 2-class는 baseline·Ours 모두 PR-AUC 0.95~1.0으로 포화. **Detection**은 이미지 단위 질병 검출이 전 모델 det PR-AUC ≈ 1.0(objectness가 정상≈0.0 / 질병≈0.95로 분리), 국소화 IoU median 0.57~0.67.
 
+**Ours 추가 분석**(3-class):
+- **Sensitivity (입력 노이즈 강건성)**: 정규화 입력에 `x + rand_like(x)·N_ratio`(N_ratio 0.1~0.5) 노이즈를 가해도 PR-AUC 저하 **최대 −2.4%** — frozen 백본+head 구조 덕에 매우 강건.
+- **Stability (데이터량 스케일링)**: train_ratio 0.1→1.0에서 PR-AUC가 0.49→0.765로 **단조 증가하고 90%↑에서 포화**(수확체감). F1-macro는 소수 d4(24장) argmax 민감으로 일부 출렁.
+
 > ⚠️ **해석 주의**: valid는 정상:질병 ≈ 13:1로 불균형이라 **accuracy·AUROC는 포화**되어 변별력이 약하다 — 우열은 **PR-AUC·F1-macro·precision**으로 판단한다. baseline은 from-scratch, Ours는 DINOv3 자기지도 pretrained(frozen)이라 **동일 조건 비교가 아님**에 유의. 소수 클래스 disease_4는 valid 24장으로 신뢰구간이 넓다.
 
 ![분류 7-메트릭 비교](report/figures/exp_metrics_table.png)
 ![Ours 개선 추이](report/figures/exp_ours_focal.png)
+![노이즈 sensitivity](report/figures/exp_sensitivity_dinov3.png)
+![train-ratio stability](report/figures/exp_stability_dinov3.png)
 
 ---
 
@@ -40,21 +46,23 @@ AI-Hub 스타일 무(radish) 작물 이미지에서 **정상(normal) vs 질병(d
 ├── baseline/              from-scratch 백본 구현 (ConvNeXtV2/EfficientNetV2/NeXtViT/MambaVision)
 ├── models/module.py       SAFEModule (백본 import용 placeholder)
 ├── src/
-│   ├── data/              데이터 파이프라인: core/loaders/transforms/build_manifest (RAM 캐시·균형 옵션)
+│   ├── data/              데이터 파이프라인: core/loaders/transforms/build_manifest (RAM 캐시·균형/train_ratio/aug 옵션)
 │   ├── models/            분류기·detector 빌더 (build_classifier/build_detector), dinov3·timm·mamba 래퍼
 │   ├── losses.py          FocalLoss
 │   ├── metrics.py         불균형 인지 분류/detection 메트릭
 │   ├── train.py           spec(yaml) 구동 학습/평가 진입점
-│   └── inference.py       데모용 추론 레지스트리
-├── demo/                  FastAPI 데모 (app.py + static/index.html)
+│   ├── inference.py       데모용 추론 레지스트리
+│   └── vqa.py             데모 VQA: whisper-base STT + SmolVLM (지연 로딩)
+├── demo/                  FastAPI 데모 (app.py + static/index.html) — 다중 파이프라인 비교 + VQA
+├── radish_demo.ipynb      한 노트북으로 환경설치→데이터압축해제·분석→학습→평가→데모 (self-contained)
 ├── data/                  *.py 스크립트만 포함 — 데이터 본체는 별도 준비(§데이터)
 ├── _workspace/
 │   ├── specs/             실험 사양 (exp_*.yaml) — 재현의 단일 출처
-│   ├── eval/              평가·리포트 생성 스크립트 (run_*.py)
+│   ├── eval/              평가·리포트·그림 생성 스크립트 (run_*.py / make_*.py; sensitivity·stability 포함)
 │   ├── data/              manifest_*.csv, data_card.md
 │   └── launch_*.sh        다중 run 병렬 학습 런처
 ├── experiments/<name>/    학습 산출물 (metrics.json·config.snapshot만 커밋; 체크포인트는 .gitignore)
-├── report/                EXPERIMENTS.md, REPORT.md, figures/, metadata.csv, stats.json
+├── report/                EXPERIMENTS.md, FINAL_REPORT.md, REPORT.md, figures/, metadata.csv, stats.json
 ├── requirements.txt
 └── CLAUDE.md              프로젝트 가이드 + 변경 이력
 ```
@@ -125,15 +133,19 @@ cd ..
 
 ---
 
-## 빠른 시작: 노트북
+## 빠른 시작: 노트북 (가장 쉬움, self-contained)
 
-데이터·환경이 준비됐다면 **`radish_demo.ipynb`** 한 파일로 학습 → 평가(지표 표·그림) → 데모를 차례로 실행할 수 있다(무거운 작업은 내부에서 `./.venv/bin/python` 서브프로세스로 수행). 기본은 대표 모델(강한 baseline + Ours + Ours-detection)만 돌리고, 전체 재현은 노트북 마지막 셀 안내를 따른다.
+**`radish_demo.ipynb`** 한 파일이 **환경 설치(`%pip`) → 데이터 압축해제·정리·분석(EDA) → 학습 → 평가 → 데모**를 모두 수행한다(무거운 작업은 내부에서 `sys.executable` 서브프로세스로). 별도의 `.venv`가 없어도 되고, **데이터 경로(`DATA_DIR`)만 지정하면 zip을 직접 풀고 by_disease·manifest까지 정리**한다.
 
 ```bash
-uv pip install --python .venv/bin/python -r requirements.txt   # jupyter 포함
+# (jupyter가 없으면) 커널만 준비
+uv pip install --python .venv/bin/python jupyterlab ipykernel
 ./.venv/bin/python -m ipykernel install --user --name python3 --display-name "Python 3 (.venv)"
 ./.venv/bin/jupyter lab    # radish_demo.ipynb 열고 위에서부터 실행
 ```
+
+- §0가 의존성을 현재 커널에 설치, §1이 `DATA_DIR`의 zip을 압축 해제·정리·EDA, §2에 **전체 42개 spec이 그룹별로 나열**(불필요한 줄 `#` 주석처리), §3~6이 평가·그림·데모.
+- 모든 단계 idempotent(이미 된 건 건너뜀). 새 데이터셋이면 §1의 `REBUILD_MANIFEST=True`.
 
 아래는 노트북 없이 CLI로 단계별 실행하는 방법이다.
 
@@ -190,7 +202,13 @@ done
 
 # Ablation (증강 × focal, gamma sweep) → §6B
 ./.venv/bin/python _workspace/eval/run_ablation_eval.py
+
+# Ours 추가 분석 (재학습 없이 best.pt 사용) → §7 Sensitivity, §8 Stability
+./.venv/bin/python _workspace/eval/run_sensitivity_eval.py   # 입력 노이즈 N_ratio 0~0.5
+./.venv/bin/python _workspace/eval/run_stability_eval.py     # train_ratio 0.1~1.0
 ```
+
+> Stability는 비율별 재학습이 필요하다: `exp_dinov3_base_focal_r{10,30,50,70,90}_normal_d3_d4.yaml`을 먼저 학습한 뒤 `run_stability_eval.py`로 곡선을 만든다. Sensitivity는 기존 Ours best.pt에 노이즈만 주입(재학습 불필요).
 
 검증 결과(누수·정합·재계산 대조)는 `_workspace/eval/verify_*.md`에 run별로 남는다.
 
@@ -209,6 +227,8 @@ done
 
 시작 시 `experiments/`의 모든 run(체크포인트 보유)을 파이프라인으로 로드한다(순수 ablation run은 제외). REST API: `GET /api/pipelines`, `GET /api/valid-images`, `POST /api/predict`(파일 업로드 또는 `valid_image_id` + `pipelines`). 데모를 쓰려면 학습 체크포인트(`experiments/*/checkpoints/best.pt`)가 있어야 한다(위 학습 단계 수행).
 
+**VQA (음성/텍스트 질의응답)**: 패널에서 **마이크 녹음·오디오 파일 업로드(wav/mp3/ogg/flac)·텍스트** 중 하나로 질문하면 **whisper-base**가 STT(ffmpeg 없이 soundfile로 디코딩)하고 **SmolVLM-500M**이 선택 이미지에 답한다. `POST /api/vqa`(이미지 + `audio` 또는 `question`). whisper/SmolVLM은 첫 호출 시 지연 로딩(HF 다운로드). 범용 VLM이라 무 질병 특화는 아니며 보조 설명용이다.
+
 ---
 
 ## 방법 요약
@@ -217,9 +237,10 @@ done
 - **클래스 균형**: train은 정상을 다운샘플해 type 간 1:1(2-class)·1:1:1(3-class). valid는 원분포 + 균형 둘 다로 평가.
 - **Ours**: **DINOv3 ViT(frozen) + 2-layer MLP 헤드**. 백본을 freeze해 사전학습 지식을 보존(catastrophic forgetting 없음)하고 헤드(수십만 파라미터)만 학습 → 작고 빠르며, 소표본·단일시즌 데이터에서 from-scratch를 크게 능가. ViT-S@256 → ViT-B@512로 키우고 **강한 증강 + focal loss(γ=2)** 를 더해 성능을 최대화.
 - **Ablation 결론**(3-class): 강한 증강이 주 동력, focal 단독(기본 증강)은 소폭 하락하지만 **증강+focal 조합에서 양의 시너지**.
+- **Sensitivity/Stability**(Ours): 입력 노이즈에 강건(PR-AUC 저하 ≤2.4%), PR-AUC가 train 데이터량에 단조 증가·90%↑ 포화.
 - **알려진 한계**: 거친 단일 bbox(병변 핀포인트 아님)·정상에도 박스 존재, 단일 시즌 데이터, valid disease_4 24장 소표본, 불균형으로 인한 accuracy/AUROC 포화 → PR-AUC/F1 중심 해석.
 
-전체 하이퍼파라미터 표는 `report/EXPERIMENTS.md` **부록 A**, 설계 노트는 `_workspace/specs/design_notes.md` 참조.
+**Ours 알고리즘 수도코드**는 `report/FINAL_REPORT.md` §2.6, 전체 하이퍼파라미터 표는 `report/EXPERIMENTS.md` **부록 A**, 설계 노트는 `_workspace/specs/design_notes.md` 참조. 종합 보고서는 `report/FINAL_REPORT.md`(Introduction/Method/Experiments/Discussion/Conclusion).
 
 ---
 

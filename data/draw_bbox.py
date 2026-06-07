@@ -15,6 +15,7 @@ CODES = [3, 4]
 
 
 def load_font(size):
+    """사용 가능한 트루타입 폰트를 size로 로드(없으면 기본 폰트)."""
     for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
               "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"):
         if os.path.exists(p):

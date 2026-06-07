@@ -1,0 +1,65 @@
+# "Ours+ focal+aug" spec. Self-contained: experiment-runner runs from this file alone.
+# DINOv3 ViT-B/16 (self-supervised pretrained, FROZEN) @512 + 2-layer MLP head.
+# Only the head (~0.40M params) is trained; backbone (85.6M) is frozen.
+# PRIMARY comparison cell (hardest 3-class setting).
+# Delta vs exp_dinov3_base_normal_d3_d4 (CE baseline): data.aug=strong + focal loss.
+# Compare against exp_dinov3_base_normal_d3_d4 (CE, default aug) — same arch/optim/seed.
+name: dinov3_base_focal_r90_normal_d3_d4
+task: classification
+model:
+  builder: src.models.build_classifier
+  arch: dinov3_base
+  num_classes: 3
+  img_size: 512
+  pretrained: true
+  frozen_backbone: true
+  head_hidden: 512
+  source: timm  # vit_base_patch16_dinov3, feat dim 768
+data:
+  builder: build_classification_loaders
+  setting: normal_d3_d4
+  train_ratio: 0.9   # Stability sweep: class-stratified train subset (valid unchanged)
+  img_size: 512
+  batch_size: 64       # frozen base@512 batch4 forward ~505MB -> 64 fits; runner may lower
+  num_workers: 8
+  aug: strong          # data-engineer: build_classification_loaders(..., aug="strong")
+optim:
+  name: adamw
+  lr: 0.001            # head-only -> larger lr; frozen features converge fast
+  wd: 0.05
+  epochs: 40           # head probe over frozen feats; a touch more than small (30) for the wider head
+  sched: cosine
+  warmup_epochs: 3
+loss:
+  type: focal          # src.losses.FocalLoss; FL = (1-p_t)^gamma * CE
+  gamma: 2.0           # focusing parameter; down-weights easy normals, focuses on hard d3/d4
+  class_weights: from_meta   # alpha role; emphasize minority d4 in 3-class even after downsample
+  label_smoothing: 0.0
+eval:
+  metrics:
+  - pr_auc
+  - macro_f1
+  - recall_disease
+  - precision_disease
+  - confusion
+  - accuracy
+  - auroc
+  primary: pr_auc
+  primary_3class_note: for normal_d3_d4 use macro PR-AUC (one-vs-rest) as primary
+  threshold_policy: argmax for prediction; PR-AUC swept over disease score
+early_stop:
+  monitor: val_pr_auc
+  mode: max
+  patience: 10
+class_names:
+- normal
+- disease_3
+- disease_4
+seed: 42
+packages:
+- torch
+- torchvision
+- timm
+- scikit-learn
+- pyyaml
+smoke: true

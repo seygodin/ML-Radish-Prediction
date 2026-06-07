@@ -21,6 +21,7 @@ IMAGENET_STD = (0.229, 0.224, 0.225)
 # Classification transforms
 # ----------------------------------------------------------------------------
 def classification_train_transform(img_size: int):
+    """분류 train 기본 증강(RandomResizedCrop+HFlip+약한 ColorJitter)+ImageNet 정규화."""
     return T.Compose([
         T.RandomResizedCrop(img_size, scale=(0.6, 1.0), ratio=(0.75, 1.333)),
         T.RandomHorizontalFlip(p=0.5),
@@ -55,6 +56,7 @@ def classification_train_transform_strong(img_size: int):
 
 
 def classification_eval_transform(img_size: int):
+    """분류 eval 변환(Resize→CenterCrop)+ImageNet 정규화(결정적)."""
     resize = int(round(img_size * 256 / 224))  # standard resize-then-centercrop ratio
     return T.Compose([
         T.Resize(resize),
@@ -68,7 +70,9 @@ def classification_eval_transform(img_size: int):
 # Detection transforms (box-synchronized). boxes: FloatTensor[N,4] xyxy.
 # ----------------------------------------------------------------------------
 class DetectionTransform:
+    """박스 동기 detection 변환. pre_resized=True면 캐시에서 이미 정사각 리사이즈·박스 스케일됨."""
     def __init__(self, img_size: int, train: bool, pre_resized: bool = False):
+        """변환 파라미터 설정(img_size, train 여부, pre_resized)."""
         self.img_size = img_size
         self.train = train
         # pre_resized=True: the image is already square img_size and boxes are
@@ -77,6 +81,7 @@ class DetectionTransform:
         self.pre_resized = pre_resized
 
     def __call__(self, img, boxes: torch.Tensor):
+        """이미지·박스에 (필요시 resize+스케일)·flip·정규화를 동기 적용해 반환."""
         if not self.pre_resized:
             orig_w, orig_h = img.size  # PIL (w, h)
             # Resize image to square (img_size x img_size); scale boxes accordingly.

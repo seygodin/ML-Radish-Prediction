@@ -39,6 +39,7 @@ _workspace/*.log
 _workspace/launch_exp_*.log
 _workspace/timing_*.log
 _workspace/demo_server.log
+_workspace/logs/
 _workspace_prev/
 
 # Stray checkpoint files anywhere

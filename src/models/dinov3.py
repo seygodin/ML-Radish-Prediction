@@ -90,6 +90,7 @@ class DINOv3ForImageClassification(nn.Module):
         pretrained: bool = True,
         frozen_backbone: bool = True,
     ):
+        """DINOv3 백본(pretrained, frozen) + 2-layer MLP 헤드 구성(헤드만 trainable)."""
         super().__init__()
         variant = variant.lower()
         if variant not in DINOV3_VARIANTS:
@@ -146,6 +147,7 @@ class DINOv3ForImageClassification(nn.Module):
         return self.backbone(images)
 
     def forward(self, images, labels=None):
+        """frozen 백본 풀링특징 → head → logits(labels 주면 (loss, logits))."""
         feats = self.forward_features(images)
         logits = self.classifier(feats)
         if labels is not None:
@@ -172,6 +174,7 @@ def build_dinov3_classifier(
     pretrained: bool = True,
     frozen_backbone: bool = True,
 ) -> nn.Module:
+    """arch/variant에 맞는 DINOv3 frozen+2-layer head 분류기 생성 헬퍼."""
     return DINOv3ForImageClassification(
         num_labels=num_classes,
         img_size=img_size,

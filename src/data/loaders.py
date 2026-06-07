@@ -51,6 +51,11 @@ CLASSIFICATION_SETTINGS = ("normal_vs_d3", "normal_vs_d4", "normal_d3_d4")
 # Downsampling helpers (train only, deterministic)
 # ----------------------------------------------------------------------------
 def _downsample(samples: list[Sample], n: int, seed: int) -> list[Sample]:
+    """`samples`에서 `n`개를 seed 고정으로 무작위 추출(클래스 균형/비율 축소용).
+
+    n이 전체보다 크거나 같으면 원본을 그대로 반환. 추출 인덱스를 정렬해 반환 순서를
+    결정적(reproducible)으로 유지한다 — 같은 seed면 항상 같은 부분집합.
+    """
     if n >= len(samples):
         return list(samples)
     rng = random.Random(seed)
@@ -92,6 +97,8 @@ def _decode_square_with_box(path: str, img_size: int, box):
 
 
 def _parallel(fn, items, workers=16):
+    """`fn`을 `items`에 스레드풀로 병렬 적용(순서 보존). 캐시 빌드 시 이미지 디코드가
+    I/O·libjpeg 바운드라 스레드로 충분히 빨라진다(GIL은 디코드 중 풀림)."""
     with ThreadPoolExecutor(max_workers=workers) as ex:
         return list(ex.map(fn, items))
 
@@ -100,18 +107,25 @@ def _parallel(fn, items, workers=16):
 # Datasets
 # ----------------------------------------------------------------------------
 class ClassificationDataset(Dataset):
+    """분류용 Dataset. 생성 시 모든 이미지를 디코드+다운스케일해 RAM에 캐시(`self.cache`)하고,
+    `__getitem__`은 캐시된 작은 PIL에 transform(증강·정규화)만 적용한다. 캐시는 fork된
+    DataLoader 워커가 copy-on-write로 공유 → 매 epoch 재디코드 없음(위 주석 참조)."""
+
     def __init__(self, samples: list[Sample], label_map: dict[str, int], transform,
                  cache_short: int):
-        self.labels = [label_map[s.klass] for s in samples]
+        """데이터셋 생성: 이미지를 1회 디코드·리사이즈해 RAM 캐시(fork COW 공유)."""
+        self.labels = [label_map[s.klass] for s in samples]   # 정수 라벨(normal=0 등)
         self.transform = transform
         # decode+downscale once; workers inherit via fork copy-on-write
         self.cache = _parallel(lambda s: _decode_resized(s.image_path, cache_short),
                                samples)
 
     def __len__(self):
+        """캐시된 샘플 수."""
         return len(self.cache)
 
     def __getitem__(self, i):
+        """캐시 이미지에 transform을 적용해 (텐서, 라벨/타깃) 반환."""
         return self.transform(self.cache[i]), self.labels[i]
 
 
@@ -126,6 +140,7 @@ class DetectionDataset(Dataset):
 
     def __init__(self, samples: list[Sample], transform: DetectionTransform,
                  img_size: int):
+        """데이터셋 생성: 이미지를 1회 디코드·리사이즈해 RAM 캐시(fork COW 공유)."""
         self.transform = transform  # pre_resized=True
         # Still decode+resize every image (normals included) so it goes through
         # the network as a negative; the box result is simply dropped for normals.
@@ -142,9 +157,11 @@ class DetectionDataset(Dataset):
         ]
 
     def __len__(self):
+        """캐시된 샘플 수."""
         return len(self.cache)
 
     def __getitem__(self, i):
+        """캐시 이미지에 transform을 적용해 (텐서, 라벨/타깃) 반환."""
         img, boxes = self.transform(self.cache[i], self.boxes[i])
         # labels track box count: disease -> [1], normal (negative) -> [] (shape [0])
         labels = torch.ones((boxes.shape[0],), dtype=torch.long)  # 1 = disease
@@ -152,6 +169,7 @@ class DetectionDataset(Dataset):
 
 
 def _detection_collate(batch):
+    """detection 배치 collate: 이미지/타깃을 가변 길이 리스트로 묶음(박스 수가 달라 stack 불가)."""
     images = [b[0] for b in batch]
     targets = [b[1] for b in batch]
     return images, targets
@@ -161,6 +179,7 @@ def _detection_collate(batch):
 # Count / weight helpers
 # ----------------------------------------------------------------------------
 def _counts(samples: list[Sample], label_map: dict[str, int], class_names: list[str]):
+    """class_names별 표본 수 dict 반환(분포 보고·가중치 계산용)."""
     counts = {name: 0 for name in class_names}
     for s in samples:
         counts[s.klass] += 1
@@ -168,6 +187,8 @@ def _counts(samples: list[Sample], label_map: dict[str, int], class_names: list[
 
 
 def _class_weights(train_counts: dict, class_names: list[str]) -> torch.Tensor:
+    """역빈도 class weight(평균 1로 정규화). train을 다운샘플로 균형 맞추면 전부 ≈1이 되어
+    focal의 alpha 역할은 사실상 무력화되고 focal은 gamma(hard-example 집중)로만 작동한다."""
     n = [max(1, train_counts[name]) for name in class_names]
     total = sum(n)
     k = len(n)
@@ -187,6 +208,7 @@ def build_classification_loaders(
     seed: int = 42,
     balance_valid: bool = False,
     aug: str = "default",
+    train_ratio: float = 1.0,
 ):
     """balance_valid=True downsamples the VALID split to a balanced ratio
     (1:1 for binary, 1:1:1 for 3-class) with a fixed seed -- for evaluating on a
@@ -197,9 +219,17 @@ def build_classification_loaders(
     HFlip + mild ColorJitter). "strong" = heavier augmentation to mitigate
     overfitting / improve generalization (adds VFlip, rotation, strong
     ColorJitter, TrivialAugmentWide, RandomErasing). VALID transform is
-    deterministic and unaffected (fair comparison)."""
+    deterministic and unaffected (fair comparison).
+
+    train_ratio: fraction (0 < train_ratio <= 1.0) of the balanced TRAIN set to
+    keep, sampled stratified PER CLASS with the fixed seed (preserves the class
+    ratio of the balanced train set). 1.0 (default) keeps the full balanced train
+    set unchanged (no behavior change). Used for data-quantity / stability
+    analysis. VALID is never affected by train_ratio."""
     if aug not in ("default", "strong"):
         raise ValueError(f"aug must be 'default' or 'strong', got {aug!r}")
+    if not (0.0 < train_ratio <= 1.0):
+        raise ValueError(f"train_ratio must be in (0, 1.0], got {train_ratio!r}")
     if setting not in CLASSIFICATION_SETTINGS:
         raise ValueError(f"setting must be one of {CLASSIFICATION_SETTINGS}, got {setting!r}")
 
@@ -249,6 +279,16 @@ def build_classification_loaders(
         else:
             valid_samples = cat.normal["valid"] + cat.d3["valid"] + cat.d4["valid"]
 
+    # Stratified train subsampling (per class) for data-quantity analysis.
+    # Applied AFTER class balancing so the balanced ratio is preserved.
+    if train_ratio < 1.0:
+        reduced: list[Sample] = []
+        for name in class_names:
+            cls_samples = [s for s in train_samples if s.klass == name]
+            n_keep = round(len(cls_samples) * train_ratio)
+            reduced += _downsample(cls_samples, n_keep, seed)
+        train_samples = reduced
+
     # deterministic ordering before shuffle for reproducibility
     train_samples.sort(key=lambda s: s.image_path)
     valid_samples.sort(key=lambda s: s.image_path)
@@ -285,6 +325,7 @@ def build_classification_loaders(
         "train_counts": train_counts,
         "valid_counts": valid_counts,
         "class_weights": class_weights,
+        "train_ratio": train_ratio,
     }
     return train_loader, valid_loader, meta
 
@@ -344,6 +385,7 @@ def build_detection_loaders(
     )
 
     def _det_counts(samples):
+        """detection 표본의 클래스별(normal/d3/d4) 개수 dict."""
         c = {"disease_3": 0, "disease_4": 0, "normal": 0}
         for s in samples:
             c[s.klass] += 1

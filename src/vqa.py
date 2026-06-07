@@ -35,6 +35,7 @@ SMOLVLM_MODEL_ID = "HuggingFaceTB/SmolVLM-500M-Instruct"
 
 
 def _device_index() -> int:
+    """cuda 디바이스 인덱스 정수 반환(pipeline device 인자용)."""
     import torch
     return 0 if torch.cuda.is_available() else -1
 

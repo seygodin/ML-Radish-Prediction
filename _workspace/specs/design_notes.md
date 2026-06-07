@@ -385,3 +385,35 @@ Ours+ focal+aug(`dinov3_base_focal_normal_d3_d4`)는 **focal loss와 strong aug�
 ## 검증 결과 (실제 cuda 스모크)
 - `build_detector("dinov3_base", img_size=512)` @512 랜덤 forward → boxes (2,4)∈[0,1], objectness (2,). DINOv3 ViT-B/16 pretrained 로드 성공.
 - frozen 확인: backbone `requires_grad=False`(전부), trainable==head, **total 85.84M / trainable 0.1997M (0.23%)**. 기존 arch(convnextv2 등 7종) 모두 여전히 빌드·forward OK.
+
+---
+
+# Stability (train ratio sweep, Ours 3-class)
+
+Ours 헤드라인(`dinov3_base_focal_normal_d3_d4` = DINOv3 ViT-B/16 frozen + strong aug + focal γ2, 3-class normal/d3/d4)의 **데이터량 대비 성능 안정성**을 본다. 헤드라인 사양을 **그대로 클론**하고 `data.train_ratio`만 바꿔, train 표본 크기를 줄여가며 PR-AUC·F1-macro의 평균 수준과 분산을 관찰한다.
+
+## 설계
+- **스윕 지점**: `data.train_ratio ∈ {0.1, 0.3, 0.5, 0.7, 0.9}` (신규 5개 사양) + **1.0**(기존 `dinov3_base_focal_normal_d3_d4` run이 참조점, 추가 사양 없음). 총 6점.
+- **축소 방식**: 로더가 지원하는 **클래스 stratified 축소** — train_ratio r에서 각 클래스 r×(227/227/227) 표본을 균등 비율로 뽑는다(검증됨). 즉 클래스 균형(다운샘플된 1:1:1 구조)을 유지한 채 절대 표본 수만 r배로 줄인다. 클래스 불균형 변화가 아니라 **순수 데이터량 효과**만 분리.
+- **고정**: valid는 **동일 split으로 불변**(모든 점이 같은 검증셋으로 평가) → 직접 비교 가능. model/optim/loss(focal γ2 from_meta)/aug(strong)/eval/early_stop/seed 42 등 **train_ratio 외 전부 동일**.
+- **불변 보장**: 5개 신규 사양은 헤드라인과 **arch dinov3_base·num_classes 3·img_size 512·source timm·pretrained·frozen_backbone·head_hidden 512·setting normal_d3_d4·batch 64·num_workers 8·aug strong·AdamW lr1e-3 wd0.05 cosine warmup3 ep40·focal γ2 from_meta·label_smoothing0·primary pr_auc·7-메트릭·early_stop(val_pr_auc/max/patience10)·class_names·seed 42·packages·smoke true** 완전 동일. 셀별로 바꾼 필드는 `name`과 `data.train_ratio` 둘뿐.
+
+| 사양 | name | data.train_ratio |
+|---|---|---|
+| `exp_dinov3_base_focal_r10_normal_d3_d4.yaml` | dinov3_base_focal_r10_normal_d3_d4 | 0.1 |
+| `exp_dinov3_base_focal_r30_normal_d3_d4.yaml` | dinov3_base_focal_r30_normal_d3_d4 | 0.3 |
+| `exp_dinov3_base_focal_r50_normal_d3_d4.yaml` | dinov3_base_focal_r50_normal_d3_d4 | 0.5 |
+| `exp_dinov3_base_focal_r70_normal_d3_d4.yaml` | dinov3_base_focal_r70_normal_d3_d4 | 0.7 |
+| `exp_dinov3_base_focal_r90_normal_d3_d4.yaml` | dinov3_base_focal_r90_normal_d3_d4 | 0.9 |
+| (기존) `exp_dinov3_base_focal_normal_d3_d4.yaml` | dinov3_base_focal_normal_d3_d4 | 1.0 (참조점) |
+
+## 비교 지표
+- **주지표 PR-AUC**(macro one-vs-rest, 헤드라인 primary와 동일)와 **F1-macro**를 train_ratio에 대해 그린다. seed 단일이므로 분산은 (a) ratio 축 곡선의 거칠기/비단조성, (b) per-class F1의 흔들림으로 정성 평가(다중 seed는 후속 ablation 여지).
+
+## 예상
+- **데이터 적을수록 성능↓**: train_ratio가 작아질수록 PR-AUC·F1-macro 평균이 하락. 단 backbone이 **frozen 사전학습**이라 학습 대상이 ~0.40M 헤드뿐이므로, from-scratch 백본보다 저데이터 강건성이 높아 **r=0.5 부근까지는 완만한 하락**, r≤0.3에서 가팔라질 것으로 예상.
+- **분산↑(저데이터)**: 표본이 작을수록(특히 d4 train 표본 r×227) 결정경계가 불안정해져 점간 변동·per-class F1 흔들림이 커질 것. d4 precision 병목(valid N=24)이 저-ratio에서 더 두드러질 가능성.
+- **포화**: r=0.7~1.0 구간은 헤드 probe가 이미 충분한 특징을 받아 **PR-AUC 포화(plateau)** 예상 — 이 경우 "Ours는 헤드라인 데이터량의 일부만으로도 동급 성능"이라는 데이터 효율 결론으로 귀결.
+
+## 검증 결과 (실제 실행)
+- 5개 신규 YAML 파싱 OK, `data.train_ratio` = {0.1,0.3,0.5,0.7,0.9} 의도대로 확인(아래 보고). 헤드라인 사양(`exp_dinov3_base_focal_normal_d3_d4.yaml`) 대비 diff는 `name`·`data.train_ratio` 둘뿐(나머지 100% 동일). 기존 사양 **미변경**.

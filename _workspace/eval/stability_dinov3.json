@@ -1,0 +1,395 @@
+{
+  "task": "stability_train_ratio_sweep",
+  "model": "Ours = DINOv3 ViT-B/16 frozen @512 + 2-layer head(hidden512) + strong aug + focal(gamma=2), 3-class (normal_d3_d4)",
+  "setting": "normal_d3_d4",
+  "num_classes": 3,
+  "valid": "original distribution (balance_valid=False), N=1403 (normal 1303 / d3 76 / d4 24)",
+  "primary_metric": "PR-AUC (disease d3,d4 OvR macro)",
+  "train_ratios": [
+    0.1,
+    0.3,
+    0.5,
+    0.7,
+    0.9,
+    1.0
+  ],
+  "note": "train_ratio sub-samples the (already balanced-downsampled) train set; the train loader balances per class so train_counts are equal across classes at each ratio. r=1.0 is the existing Ours focal+aug 3-class run (report section 6 canonical). No retraining: metrics.json + predictions/valid.npz used; best.pt never loaded. PR-AUC monitored for early-stop; F1-macro is argmax-threshold(0.5)-dependent and sensitive to the d4 N=24 minority class.",
+  "per_ratio": {
+    "0.1": {
+      "train_ratio": 0.1,
+      "run": "dinov3_base_focal_r10_normal_d3_d4",
+      "best_epoch": 3,
+      "train_counts": {
+        "normal": 23,
+        "disease_3": 23,
+        "disease_4": 23
+      },
+      "train_per_class": 23,
+      "train_total": 69,
+      "valid_counts": {
+        "normal": 1303,
+        "disease_3": 76,
+        "disease_4": 24
+      },
+      "n_valid": 1403,
+      "pr_auc": 0.4891574850717798,
+      "f1_macro": 0.3158299508651997,
+      "accuracy": 0.7013542409123307,
+      "auroc": 0.955620959422195,
+      "confusion": [
+        [
+          961,
+          0,
+          342
+        ],
+        [
+          0,
+          0,
+          76
+        ],
+        [
+          1,
+          0,
+          23
+        ]
+      ],
+      "reported": {
+        "pr_auc": 0.4891574850717798,
+        "f1_macro": 0.3158299508651997,
+        "accuracy": 0.7013542409123307,
+        "auroc": 0.955620959422195
+      },
+      "reported_vs_recomputed_match": true,
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      }
+    },
+    "0.3": {
+      "train_ratio": 0.3,
+      "run": "dinov3_base_focal_r30_normal_d3_d4",
+      "best_epoch": 26,
+      "train_counts": {
+        "normal": 68,
+        "disease_3": 68,
+        "disease_4": 68
+      },
+      "train_per_class": 68,
+      "train_total": 204,
+      "valid_counts": {
+        "normal": 1303,
+        "disease_3": 76,
+        "disease_4": 24
+      },
+      "n_valid": 1403,
+      "pr_auc": 0.6401912630172703,
+      "f1_macro": 0.6608095795913055,
+      "accuracy": 0.947255880256593,
+      "auroc": 0.9890672040665455,
+      "confusion": [
+        [
+          1258,
+          26,
+          19
+        ],
+        [
+          0,
+          60,
+          16
+        ],
+        [
+          0,
+          13,
+          11
+        ]
+      ],
+      "reported": {
+        "pr_auc": 0.6401912630172703,
+        "f1_macro": 0.6608095795913055,
+        "accuracy": 0.947255880256593,
+        "auroc": 0.9890672040665455
+      },
+      "reported_vs_recomputed_match": true,
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      }
+    },
+    "0.5": {
+      "train_ratio": 0.5,
+      "run": "dinov3_base_focal_r50_normal_d3_d4",
+      "best_epoch": 14,
+      "train_counts": {
+        "normal": 114,
+        "disease_3": 114,
+        "disease_4": 114
+      },
+      "train_per_class": 114,
+      "train_total": 342,
+      "valid_counts": {
+        "normal": 1303,
+        "disease_3": 76,
+        "disease_4": 24
+      },
+      "n_valid": 1403,
+      "pr_auc": 0.6802248344378874,
+      "f1_macro": 0.697801101654287,
+      "accuracy": 0.955096222380613,
+      "auroc": 0.9916515174820587,
+      "confusion": [
+        [
+          1270,
+          1,
+          32
+        ],
+        [
+          0,
+          55,
+          21
+        ],
+        [
+          0,
+          9,
+          15
+        ]
+      ],
+      "reported": {
+        "pr_auc": 0.6802248344378874,
+        "f1_macro": 0.697801101654287,
+        "accuracy": 0.955096222380613,
+        "auroc": 0.9916515174820587
+      },
+      "reported_vs_recomputed_match": true,
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      }
+    },
+    "0.7": {
+      "train_ratio": 0.7,
+      "run": "dinov3_base_focal_r70_normal_d3_d4",
+      "best_epoch": 9,
+      "train_counts": {
+        "normal": 159,
+        "disease_3": 159,
+        "disease_4": 159
+      },
+      "train_per_class": 159,
+      "train_total": 477,
+      "valid_counts": {
+        "normal": 1303,
+        "disease_3": 76,
+        "disease_4": 24
+      },
+      "n_valid": 1403,
+      "pr_auc": 0.7476063570565178,
+      "f1_macro": 0.559397705580777,
+      "accuracy": 0.9387027797576621,
+      "auroc": 0.9952339429037123,
+      "confusion": [
+        [
+          1278,
+          0,
+          25
+        ],
+        [
+          0,
+          15,
+          61
+        ],
+        [
+          0,
+          0,
+          24
+        ]
+      ],
+      "reported": {
+        "pr_auc": 0.7476063570565178,
+        "f1_macro": 0.559397705580777,
+        "accuracy": 0.9387027797576621,
+        "auroc": 0.9952339429037123
+      },
+      "reported_vs_recomputed_match": true,
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      }
+    },
+    "0.9": {
+      "train_ratio": 0.9,
+      "run": "dinov3_base_focal_r90_normal_d3_d4",
+      "best_epoch": 10,
+      "train_counts": {
+        "normal": 204,
+        "disease_3": 204,
+        "disease_4": 204
+      },
+      "train_per_class": 204,
+      "train_total": 612,
+      "valid_counts": {
+        "normal": 1303,
+        "disease_3": 76,
+        "disease_4": 24
+      },
+      "n_valid": 1403,
+      "pr_auc": 0.7514132327336557,
+      "f1_macro": 0.7336886165553579,
+      "accuracy": 0.9629365645046329,
+      "auroc": 0.9948302052953119,
+      "confusion": [
+        [
+          1282,
+          1,
+          20
+        ],
+        [
+          0,
+          47,
+          29
+        ],
+        [
+          0,
+          2,
+          22
+        ]
+      ],
+      "reported": {
+        "pr_auc": 0.7514132327336557,
+        "f1_macro": 0.7336886165553579,
+        "accuracy": 0.9629365645046329,
+        "auroc": 0.9948302052953119
+      },
+      "reported_vs_recomputed_match": true,
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      }
+    },
+    "1.0": {
+      "train_ratio": 1.0,
+      "run": "dinov3_base_focal_normal_d3_d4",
+      "best_epoch": 26,
+      "train_counts": {
+        "normal": 227,
+        "disease_3": 227,
+        "disease_4": 227
+      },
+      "train_per_class": 227,
+      "train_total": 681,
+      "valid_counts": {
+        "normal": 1303,
+        "disease_3": 76,
+        "disease_4": 24
+      },
+      "n_valid": 1403,
+      "pr_auc": 0.7647347276777785,
+      "f1_macro": 0.7742623121748902,
+      "accuracy": 0.9729151817533856,
+      "auroc": 0.9951155814296849,
+      "confusion": [
+        [
+          1292,
+          2,
+          9
+        ],
+        [
+          1,
+          52,
+          23
+        ],
+        [
+          0,
+          3,
+          21
+        ]
+      ],
+      "reported": {
+        "pr_auc": 0.7647347276777785,
+        "f1_macro": 0.7742623121748902,
+        "accuracy": 0.9729151817533856,
+        "auroc": 0.9951155814296849
+      },
+      "reported_vs_recomputed_match": true,
+      "boundary": {
+        "pred_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_dist": {
+          "0": 1303,
+          "1": 76,
+          "2": 24
+        },
+        "manifest_total": 1403,
+        "n_pred": 1403,
+        "dist_match": true
+      }
+    }
+  },
+  "sklearn_crosscheck": {
+    "0.5": {
+      "pr_auc_sklearn_ovr_macro": 0.6802248344378874,
+      "reported_pr_auc": 0.6802248344378874
+    },
+    "1.0": {
+      "pr_auc_sklearn_ovr_macro": 0.7647347276777785,
+      "reported_pr_auc": 0.7647347276777785
+    }
+  }
+}

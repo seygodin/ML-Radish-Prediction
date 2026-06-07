@@ -14,6 +14,7 @@ SPLITS = ["train", "valid"]
 
 
 def link(target, linkpath):
+    """target을 src로 가리키는 상대 심링크 생성(기존 링크는 교체)."""
     if os.path.islink(linkpath) or os.path.exists(linkpath):
         os.remove(linkpath)
     rel = os.path.relpath(target, os.path.dirname(linkpath))

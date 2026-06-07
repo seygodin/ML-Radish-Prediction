@@ -64,6 +64,7 @@ _SMOKE_BATCH_SIZE = 8
 # Utilities
 # ---------------------------------------------------------------------------
 def set_seed(seed: int) -> None:
+    """random/numpy/torch(+cuda) 시드를 고정해 재현성 확보."""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -71,6 +72,7 @@ def set_seed(seed: int) -> None:
 
 
 def setup_logger(log_path: Path) -> logging.Logger:
+    """run별 파일+stdout 로거 구성(experiments/<name>/train.log)."""
     logger = logging.getLogger(f"train.{log_path.parent.name}")
     logger.setLevel(logging.INFO)
     logger.handlers.clear()
@@ -86,6 +88,7 @@ def setup_logger(log_path: Path) -> logging.Logger:
 
 
 def package_versions(pkgs: list[str]) -> dict:
+    """지정 패키지들의 설치 버전을 dict로 수집(config.snapshot 기록용)."""
     import importlib
     versions = {}
     name_map = {"scikit-learn": "sklearn", "pyyaml": "yaml"}
@@ -100,6 +103,7 @@ def package_versions(pkgs: list[str]) -> dict:
 
 
 def git_state() -> str:
+    """현재 git HEAD 커밋 해시(없으면 표식) 반환 — 재현 추적용."""
     try:
         out = subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=str(_REPO_ROOT),
@@ -113,6 +117,7 @@ def git_state() -> str:
 
 
 def cosine_warmup_lr(step: int, total_steps: int, warmup_steps: int, base_lr: float) -> float:
+    """warmup 후 cosine 감쇠 학습률 스케줄 값을 step에 대해 계산."""
     if total_steps <= 0:
         return base_lr
     if step < warmup_steps and warmup_steps > 0:
@@ -123,6 +128,7 @@ def cosine_warmup_lr(step: int, total_steps: int, warmup_steps: int, base_lr: fl
 
 
 def resolve_outdir(name: str, smoke: bool) -> Path:
+    """출력 디렉토리 결정. 기존 run은 덮지 않고 _vN으로 분기, smoke는 _smoke_ 격리."""
     base = _REPO_ROOT / "experiments"
     if smoke:
         return base / f"_smoke_{name}"
@@ -171,6 +177,7 @@ def giou_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
 # ---------------------------------------------------------------------------
 def run_classification(spec: dict, args, outdir: Path, logger: logging.Logger,
                        device: torch.device, snapshot: dict) -> dict:
+    """분류 spec 학습/평가 루프: 로더·모델 구성, head/trainable만 옵티마이저, epoch별 valid 평가·best 체크포인트·predictions·metrics.json."""
     d = spec["data"]
     o = spec["optim"]
     loss_cfg = spec.get("loss", {})
@@ -186,6 +193,7 @@ def run_classification(spec: dict, args, outdir: Path, logger: logging.Logger,
         setting=d["setting"], img_size=int(d["img_size"]),
         batch_size=batch_size, num_workers=num_workers, seed=seed,
         aug=aug,
+        train_ratio=float(d.get("train_ratio", 1.0)),
     )
     class_names = meta["class_names"]
     num_classes = meta["num_classes"]
@@ -377,6 +385,7 @@ def run_classification(spec: dict, args, outdir: Path, logger: logging.Logger,
 # ---------------------------------------------------------------------------
 def run_detection(spec: dict, args, outdir: Path, logger: logging.Logger,
                   device: torch.device, snapshot: dict) -> dict:
+    """detection spec 학습/평가 루프: 단일박스 GIoU+L1(양성만)+objectness BCE, 이미지단위 검출+IoU 평가."""
     d = spec["data"]
     o = spec["optim"]
     loss_cfg = spec.get("loss", {})
@@ -436,6 +445,7 @@ def run_detection(spec: dict, args, outdir: Path, logger: logging.Logger,
     def _targets_to_tensors(targets):
         # box (xyxy in pixels per loader) -> normalize to [0,1] by img_size.
         # Loader resizes to (img_size, img_size); boxes are in that pixel space.
+        """detection 타깃 리스트를 (gt_boxes, has_box) 텐서로 변환(빈 박스=음성→has_box 0)."""
         sz = float(spec["model"]["img_size"])
         boxes, has_box = [], []
         for t in targets:
@@ -625,6 +635,7 @@ def run_detection(spec: dict, args, outdir: Path, logger: logging.Logger,
 # Main
 # ---------------------------------------------------------------------------
 def main() -> int:
+    """CLI 진입점: spec 로드 → task 분기 → 표준 산출물 생성. 실패해도 metrics.json(status:failed) 기록."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", required=True, type=str)
     ap.add_argument("--device", default="cuda:0", type=str)

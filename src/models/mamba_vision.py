@@ -48,6 +48,7 @@ class _VisionMambaBackbone(nn.Module):
     """Conv patch-embed -> Mamba blocks -> pooled feature (B, d_model)."""
 
     def __init__(self, d_model: int, n_layers: int, patch_size: int, img_size: int):
+        """Vision-Mamba(mambapy) 구성: patch-embed → mamba 블록 → 헤드."""
         super().__init__()
         self.d_model = d_model
         self.patch_size = patch_size
@@ -63,6 +64,7 @@ class _VisionMambaBackbone(nn.Module):
         self.norm = nn.LayerNorm(d_model)
 
     def _interp_pos(self, n_tokens: int) -> torch.Tensor:
+        """입력 토큰 수에 맞춰 위치 임베딩을 보간."""
         if n_tokens == self.pos_embed.shape[1]:
             return self.pos_embed
         # Bilinear-interpolate the positional grid for a different resolution.
@@ -73,6 +75,7 @@ class _VisionMambaBackbone(nn.Module):
         return pe.permute(0, 2, 3, 1).reshape(1, g1 * g1, self.d_model)
 
     def forward_features(self, images: torch.Tensor) -> torch.Tensor:
+        """patch 토큰 → mamba 인코더 → 평균풀링한 (B,C) 특징."""
         x = self.patch_embed(images)              # (B, d_model, g, g)
         x = x.flatten(2).transpose(1, 2)          # (B, N, d_model)
         x = x + self._interp_pos(x.shape[1])
@@ -81,6 +84,7 @@ class _VisionMambaBackbone(nn.Module):
         return x.mean(dim=1)                      # (B, d_model)
 
     def forward(self, images: torch.Tensor) -> torch.Tensor:
+        """특징 → 헤드 → logits(labels 주면 (loss, logits))."""
         return self.forward_features(images)
 
 
@@ -91,6 +95,7 @@ class VisionMambaForImageClassification(nn.Module):
     """
 
     def __init__(self, num_labels=2, img_size=224, hidden_dim=512, model_variant="base"):
+        """Vision-Mamba(mambapy) 구성: patch-embed → mamba 블록 → 헤드."""
         super().__init__()
         cfg = _VARIANTS.get(model_variant, _VARIANTS["base"])
         self.backbone = _VisionMambaBackbone(
@@ -109,6 +114,7 @@ class VisionMambaForImageClassification(nn.Module):
         )
 
     def forward(self, images, labels=None):
+        """특징 → 헤드 → logits(labels 주면 (loss, logits))."""
         feats = self.backbone.forward_features(images)
         logits = self.classifier(feats)
         if labels is not None:
