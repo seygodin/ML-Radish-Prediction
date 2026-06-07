@@ -16,7 +16,11 @@
 
 ## 2. Introduction
 
-무(radish)는 국내 주요 노지 작물로, 잎·뿌리 질병의 조기 진단은 수확 손실 저감과 방제 시기 결정에 직결된다. 본 연구는 AI-Hub 무 질병 이미지 데이터셋(정상/질병 이미지 + 라벨 JSON)을 사용한다. 이 데이터의 본질적 난점은 **극심한 클래스 불균형**이다.
+**AI 기반 질병 진단.** 딥러닝은 지난 10년간 이미지 기반 질병 진단의 표준 도구가 되었고, 농업(정밀농업, precision agriculture)도 예외가 아니다 [25]. 작물의 잎·열매·뿌리 이미지를 입력으로 질병 유무·종류를 자동 판별하면 전문가 육안 진단의 비용·지연·주관성을 줄이고 조기 방제를 가능케 한다. 농업 현장은 데이터가 풍부하지만 라벨링 비용이 크고 도메인(작물·계절·촬영조건) 변동이 심해, 일반 의료·산업 영상과는 다른 실전 난점을 가진다.
+
+**작물 질병 분류·검출.** 이 분야의 주류는 CNN 기반 **이미지 분류**다. PlantVillage(54,306장, 14작물·26질병)에서 GoogLeNet/AlexNet이 99% 이상의 정확도를 보고했고 [22, 23], 이후 더 깊은 백본과 전이학습으로 확장되었다 [24, 28]. 그러나 이런 결과의 상당수는 **단일 잎을 통제된 배경에서 촬영한 균형 데이터셋**에 기반하며, 실제 노지(in-field) 이미지로 옮기면 성능이 크게 떨어진다 [25, 29]. 나아가 "질병이 있는가"를 넘어 "어디에 있는가"를 답하려면 **검출(detection)** 이 필요하다. 잎 위 병반을 bounding box로 잡는 실시간 검출기가 토마토 등에서 제안되었고 [26], 작물 병해충 검출 전반이 리뷰되었다 [27]. 본 연구는 이 두 과제(분류 + 검출)를 한 데이터에서 함께 다룬다.
+
+**무(radish) 질병 — 본 연구의 범위.** 무(radish)는 국내 주요 노지 작물로, 잎·뿌리 질병의 조기 진단은 수확 손실 저감과 방제 시기 결정에 직결된다. 본 연구는 통제된 PlantVillage류가 아니라 **실제 노지에서 수집된 AI-Hub 무 질병 이미지 데이터셋**(정상/질병 이미지 + 라벨 JSON)을 사용해, (G1) 질병 종류별 분류와 (G2) 질병 영역 검출을 수행한다. 선행 연구의 통제된 설정과 달리 이 실전 데이터의 본질적 난점은 **극심한 클래스 불균형**이다.
 
 | split | normal | disease | 합계 | 불균형(정상:질병) |
 |-------|-------:|--------:|-----:|:---------------:|
@@ -46,6 +50,8 @@
 ---
 
 ## 4. Related Work
+
+**농업에서의 AI — 작물 질병 진단.** 딥러닝의 농업 적용은 작황 예측·잡초 탐지·병해충 진단 등으로 폭넓게 조사되었으며, 그중 질병 진단이 가장 활발한 응용 중 하나다 [25]. 분류 쪽에서는 Mohanty 등 [22]이 PlantVillage 공개 데이터 [23]에서 CNN으로 99.35% 정확도를 보고하며 흐름을 열었고, Ferentinos [24]는 25작물·58질병으로 규모를 키워 VGG 계열이 99.5%에 이름을 보였으며, Too 등 [28]은 여러 백본의 fine-tuning을 비교했다. 그러나 Kamilaris & Prenafeta-Boldú [25]와 Barbedo [29]는 이런 고성능이 대체로 **통제된 단일 잎·균형 데이터**에 기인하고, **데이터의 양·다양성·실제 노지 조건**이 일반화의 핵심 병목임을 지적한다 — 본 연구의 불균형·노지 데이터, 그리고 §6.7 데이터 효율(stability) 분석이 정확히 이 지점을 겨냥한다. 검출(국소화) 쪽에서는 Fuentes 등 [26]이 토마토 병해충을 bounding box로 잡는 실시간 검출기를, Liu & Wang [27]이 작물 병해충 검출 전반을 리뷰했다. 본 연구는 분류와 (거친 단일 박스) 검출을 동일 무 데이터에서 함께 다루되, 통제 데이터가 아닌 실전 불균형 데이터에서 **전이학습**으로 접근한다는 점에서 위 선행 연구를 노지·불균형 설정으로 확장한다.
 
 **자기지도 사전학습 ViT.** DINO/DINOv2 [2] 계열은 레이블 없이 강한 일반 시각 표현을 학습하며, 동결 backbone에 선형/경량 head만 얹는 전이가 적은 데이터에서 효과적임이 알려져 있다. 본 연구는 그 최신판인 **DINOv3** [1]를 동결 backbone으로 사용한다. ViT 구조 자체는 [3]에 기인한다.
 
@@ -244,6 +250,16 @@ baseline 우열(PR-AUC): **DenseNet121 ≈ ResNet50 ≳ EfficientNetV2 > NeXtViT
 [19] Marafioti et al. (Hugging Face). *SmolVLM: Redefining Small and Efficient Multimodal Models.* arXiv, 2025.
 [20] AI-Hub. *노지작물 질병 진단 이미지 (무/radish).* 한국지능정보사회진흥원(NIA).
 [21] Paszke et al. *PyTorch: An Imperative Style, High-Performance Deep Learning Library.* NeurIPS, 2019.
+
+*— 농업/작물 질병 AI —*
+[22] Mohanty, Hughes & Salathé. *Using Deep Learning for Image-Based Plant Disease Detection.* Frontiers in Plant Science, 7:1419, 2016.
+[23] Hughes & Salathé. *An Open Access Repository of Images on Plant Health to Enable the Development of Mobile Disease Diagnostics (PlantVillage).* arXiv:1511.08060, 2015.
+[24] Ferentinos. *Deep Learning Models for Plant Disease Detection and Diagnosis.* Computers and Electronics in Agriculture, 145:311–318, 2018.
+[25] Kamilaris & Prenafeta-Boldú. *Deep Learning in Agriculture: A Survey.* Computers and Electronics in Agriculture, 147:70–90, 2018.
+[26] Fuentes, Yoon, Kim & Park. *A Robust Deep-Learning-Based Detector for Real-Time Tomato Plant Diseases and Pests Recognition.* Sensors, 17(9):2022, 2017.
+[27] Liu & Wang. *Plant Diseases and Pests Detection Based on Deep Learning: A Review.* Plant Methods, 17:22, 2021.
+[28] Too, Yujian, Njuki & Yingchun. *A Comparative Study of Fine-Tuning Deep Learning Models for Plant Disease Identification.* Computers and Electronics in Agriculture, 161:272–279, 2019.
+[29] Barbedo. *Impact of Dataset Size and Variety on the Effectiveness of Deep Learning and Transfer Learning for Plant Disease Classification.* Computers and Electronics in Agriculture, 153:46–53, 2018.
 
 ---
 
