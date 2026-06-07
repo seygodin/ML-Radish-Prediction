@@ -28,6 +28,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 2026-05-31 | §1·§1B 분류표에 Ours(dinov3 small/base/focal) 행 추가(pretrained-frozen 구분 주석). DINOv3-B frozen detection 추가·학습→§3/§3B Ours 행. 데모 재기동(38 파이프라인, dinov3 10개 반영, ablation 제외) | report §1/§1B/§3/§3B, src/models/detector.py, src/inference.py, demo | 사용자 "Ours를 detection 표·데모에 반영" 요청 |
 | 2026-06-02 | 데모에 VQA 추가: whisper-base STT(ffmpeg 없이 WAV→배열) + SmolVLM-500M VQA. POST /api/vqa(이미지+오디오/텍스트), 프론트 VQA 패널(브라우저 WAV 녹음). 라이브 검증 HTTP 200 | src/vqa.py, demo/app.py, demo/static/index.html, requirements | 사용자 VQA 요청 |
 | 2026-06-02 | Sensitivity 분석(§7): Ours(dinov3_base_focal 3-class) best.pt forward 전용, 정규화 입력텐서에 노이즈 x+rand_like(x)*N_ratio(0~0.5). 매우 강건 — PR-AUC 저하 최대 −2.4%, clean(0.0)은 §6와 일치 | report §7, _workspace/eval/run_sensitivity_eval.py | 사용자 "노이즈 sensitivity 분석" 요청 |
+| 2026-06-07 | Streamlit 데모 추가(demo/streamlit_app.py): src.inference·src.vqa 재사용, 다중 파이프라인 비교+박스 오버레이+VQA(st.audio_input). 로직 검증 완료, 서버 부팅은 로컬에서 | demo/streamlit_app.py, requirements, README | 사용자 "streamlit 버전 데모" 요청 |
 
 ## Project goal
 

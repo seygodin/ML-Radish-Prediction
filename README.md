@@ -229,6 +229,15 @@ done
 
 **VQA (음성/텍스트 질의응답)**: 패널에서 **마이크 녹음·오디오 파일 업로드(wav/mp3/ogg/flac)·텍스트** 중 하나로 질문하면 **whisper-base**가 STT(ffmpeg 없이 soundfile로 디코딩)하고 **SmolVLM-500M**이 선택 이미지에 답한다. `POST /api/vqa`(이미지 + `audio` 또는 `question`). whisper/SmolVLM은 첫 호출 시 지연 로딩(HF 다운로드). 범용 VLM이라 무 질병 특화는 아니며 보조 설명용이다.
 
+**Streamlit 버전**: 동일 기능(다중 파이프라인 비교 + 검출 박스 오버레이 + VQA)을 Streamlit으로도 제공한다(`src.inference`·`src.vqa` 재사용).
+
+```bash
+./.venv/bin/streamlit run demo/streamlit_app.py --server.port 8502
+# 브라우저: http://<host>:8502
+```
+
+마이크 녹음은 `st.audio_input`, 오디오 파일 업로드/텍스트 질문 모두 지원. FastAPI 버전과 동일하게 학습 체크포인트가 필요하다.
+
 ---
 
 ## 방법 요약
