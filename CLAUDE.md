@@ -29,6 +29,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 2026-06-02 | 데모에 VQA 추가: whisper-base STT(ffmpeg 없이 WAV→배열) + SmolVLM-500M VQA. POST /api/vqa(이미지+오디오/텍스트), 프론트 VQA 패널(브라우저 WAV 녹음). 라이브 검증 HTTP 200 | src/vqa.py, demo/app.py, demo/static/index.html, requirements | 사용자 VQA 요청 |
 | 2026-06-02 | Sensitivity 분석(§7): Ours(dinov3_base_focal 3-class) best.pt forward 전용, 정규화 입력텐서에 노이즈 x+rand_like(x)*N_ratio(0~0.5). 매우 강건 — PR-AUC 저하 최대 −2.4%, clean(0.0)은 §6와 일치 | report §7, _workspace/eval/run_sensitivity_eval.py | 사용자 "노이즈 sensitivity 분석" 요청 |
 | 2026-06-07 | Streamlit 데모 추가(demo/streamlit_app.py): src.inference·src.vqa 재사용, 다중 파이프라인 비교+박스 오버레이+VQA(st.audio_input). 로직 검증 완료, 서버 부팅은 로컬에서 | demo/streamlit_app.py, requirements, README | 사용자 "streamlit 버전 데모" 요청 |
+| 2026-06-07 | report/PAPER.md 작성: 외부 공개용 단일 자립 논문(goal~reference 9섹션+부록A/B, 그림 8개 base64 내장, 내부경로 참조 0). 서론 깔때기화 + Related Work 농업AI 실논문 인용([22]~[29]) | report/PAPER.md | 사용자 "paper final report / 공개용 정리 / 농업AI related work" 요청 |
+| 2026-06-07 | §6.8 Explainability 추가: 예시 normal+abnormal(d3·d4) Ours detection 시각화(forward-only) + VQA 영어 질병특성 QA 예시. det objectness 0.026/0.978/0.950 정확분리, VQA는 보조설명 한정 | report/PAPER.md, _workspace/eval/run_explainability.py, report/figures/exp_explainability_detection.png | 사용자 "설명가능성 실험(detection 시각화+VQA QA)" 요청 |
+| 2026-06-07 | §6.9 XAI 추가: Ours(dinov3_base_focal 3-class) Grad-CAM(frozen 백본→input requires_grad로 grad 흘림, blocks[-1].norm1 32×32 reshape)+LIME+SHAP. 세 기법 모두 무 잎·병변에 근거 집중(DINO 표현 정렬 교차검증). XAI 의존성 추가 | report/PAPER.md, _workspace/eval/run_xai.py, report/figures/exp_xai_dinov3.png, requirements | 사용자 "Grad-CAM/LIME/SHAP로 DINO 이해도 확인" 요청 |
 
 ## Project goal
 

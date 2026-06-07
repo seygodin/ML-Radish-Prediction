@@ -1,0 +1,130 @@
+{
+  "detection": [
+    {
+      "klass": "normal",
+      "objectness": 0.02638,
+      "is_disease": false,
+      "pred_box": [
+        523.8,
+        831.11,
+        1799.66,
+        3524.23
+      ],
+      "gt_box": null
+    },
+    {
+      "klass": "disease_3",
+      "objectness": 0.977722,
+      "is_disease": true,
+      "pred_box": [
+        243.05,
+        154.85,
+        2722.14,
+        2954.65
+      ],
+      "gt_box": [
+        185.0,
+        809.0,
+        3024.0,
+        2622.0
+      ]
+    },
+    {
+      "klass": "disease_4",
+      "objectness": 0.950034,
+      "is_disease": true,
+      "pred_box": [
+        303.64,
+        184.43,
+        2637.1,
+        2931.94
+      ],
+      "gt_box": [
+        0.0,
+        991.0,
+        3024.0,
+        3024.0
+      ]
+    }
+  ],
+  "vqa": [
+    {
+      "klass": "normal",
+      "risk": "0",
+      "qa": [
+        {
+          "question": "Is this radish leaf healthy or diseased?",
+          "answer": "The leaf is healthy."
+        },
+        {
+          "question": "What disease symptoms are visible on this radish plant?",
+          "answer": "There are no radish plants present in the image, only a plant with a leaf."
+        },
+        {
+          "question": "Describe the color and texture of any affected or damaged areas.",
+          "answer": "The image depicts a close-up view of a plant, specifically a green leaf, which appears to be a common type of plant known as a cotyledon. The leaf has a serrated edge, indicative of its characteristic shape and structure. The leaf is broad, with prominent veins running vertically along its length, which are typical of most plants. The veins are clearly visible and help to distinguish the leaf from other parts of the plant.\n\nThe leaf is positioned in the center of the image, and it is surrounded by other plants, which are also green and appear to be healthy. The soil in the pots is dark brown, indicating that it is likely made of peat or similar types of soil that retain moisture. The soil is not overly wet, as evidenced by the slight dryness visible on the leaf's surface.\n\nThe background of the image is slightly blurred, but it appears to be a dark, possibly concrete or brick surface, which is typical of a garden or a greenhouse setting. The lighting in the image is natural, as the shadows are soft and the colors are vibrant, suggesting that the image was taken during the day.\n\nThe overall composition of the image is simple and focused on the plant, with the leaf as the central subject. The"
+        },
+        {
+          "question": "Which part of the image shows the most severe damage?",
+          "answer": "There is a leaf with a hole in the image."
+        }
+      ]
+    },
+    {
+      "klass": "disease_3",
+      "risk": "1",
+      "qa": [
+        {
+          "question": "Is this radish leaf healthy or diseased?",
+          "answer": "The leaf has holes, which might indicate it is diseased."
+        },
+        {
+          "question": "What disease symptoms are visible on this radish plant?",
+          "answer": "There are holes on the green leaves of the radish plant."
+        },
+        {
+          "question": "Describe the color and texture of any affected or damaged areas.",
+          "answer": "The image features a green leaf with several damaged or discolored areas. The leaf appears to be a broadleaf plant, characterized by its broad, flat surface and large, broad leaves. The leaf has a rough texture, with visible veins and rough patches. \n\nThe most prominent area on the leaf is a large, irregularly shaped hole or crack. This hole is located in the center of the leaf and is surrounded by a rough, uneven surface. The surrounding area around the hole is slightly darker, possibly indicating a small area of discoloration or a small insect or pest.\n\nThe leaf also has several smaller, less noticeable areas of damage, which are scattered across the surface. These areas are less pronounced than the large, irregular hole and appear less severe.\n\nThe background of the image is filled with other green leaves, which are out of focus, making the main leaf the focal point. The leaves are of different shapes and sizes, and they are arranged in a somewhat random pattern.\n\nGiven the description, a logical inference can be made about the possible cause of the damage to the leaf. Possible causes could include insect infestation, environmental factors such as drought or excessive sunlight, or natural wear and tear.\n\nIn summary, the image shows a green leaf"
+        },
+        {
+          "question": "Which part of the image shows the most severe damage?",
+          "answer": "There is a hole in the leaf in the middle of the image."
+        }
+      ]
+    },
+    {
+      "klass": "disease_4",
+      "risk": "1",
+      "qa": [
+        {
+          "question": "Is this radish leaf healthy or diseased?",
+          "answer": "The leaf appears to be healthy."
+        },
+        {
+          "question": "What disease symptoms are visible on this radish plant?",
+          "answer": "There are brown spots on the radish plant."
+        },
+        {
+          "question": "Describe the color and texture of any affected or damaged areas.",
+          "answer": "The affected or damaged areas are green and appear to be in the middle of the image. The texture of the affected areas is rough and uneven."
+        },
+        {
+          "question": "Which part of the image shows the most severe damage?",
+          "answer": "There is a plant with a damaged leaf in the image."
+        }
+      ]
+    }
+  ],
+  "questions": [
+    "Is this radish leaf healthy or diseased?",
+    "What disease symptoms are visible on this radish plant?",
+    "Describe the color and texture of any affected or damaged areas.",
+    "Which part of the image shows the most severe damage?"
+  ],
+  "det_pipeline": "dinov3_base_detection_singlebox",
+  "examples": [
+    "/home/seungeon/Workspace/side/radish/data/valid/[원천]무_0.정상/V006_79_0_00_02_03_12_0_c18_20201223_0022_S01_1.JPG",
+    "/home/seungeon/Workspace/side/radish/data/by_disease/valid/disease_3/images/V006_79_1_03_02_03_12_1_5389e_20201120_19.jpeg",
+    "/home/seungeon/Workspace/side/radish/data/by_disease/valid/disease_4/images/V006_79_1_04_02_03_12_1_5389e_20201106_11.jpeg"
+  ]
+}

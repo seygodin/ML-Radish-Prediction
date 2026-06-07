@@ -36,6 +36,13 @@ nbconvert
 # --- 데모 (Streamlit 버전) ---
 streamlit              # demo/streamlit_app.py — 다중 파이프라인 비교 + VQA
 
+# --- XAI 시각화 (report §6.9: Grad-CAM/LIME/SHAP) ---
+grad-cam                # ViT Grad-CAM (pytorch_grad_cam)
+lime                    # 슈퍼픽셀 LIME
+shap                    # Partition SHAP
+scikit-image            # LIME 슈퍼픽셀/경계
+opencv-python-headless  # grad-cam 의존(시각화)
+
 # --- 데모 VQA (음성질문 STT + 이미지 QA) ---
 transformers==5.9.0     # whisper-base(STT) + SmolVLM(VQA)
 accelerate

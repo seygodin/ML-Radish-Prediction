@@ -1,0 +1,57 @@
+{
+  "pipeline": "dinov3_base_focal_normal_d3_d4",
+  "classes": [
+    "normal",
+    "disease_3",
+    "disease_4"
+  ],
+  "records": [
+    {
+      "klass": "normal",
+      "pred": "normal",
+      "probs": {
+        "normal": 0.9999,
+        "disease_3": 0.0,
+        "disease_4": 0.0001
+      },
+      "methods": {
+        "gradcam": "ok",
+        "lime": "ok",
+        "shap": "ok"
+      }
+    },
+    {
+      "klass": "disease_3",
+      "pred": "disease_3",
+      "probs": {
+        "normal": 0.0,
+        "disease_3": 0.5398,
+        "disease_4": 0.4602
+      },
+      "methods": {
+        "gradcam": "ok",
+        "lime": "ok",
+        "shap": "ok"
+      }
+    },
+    {
+      "klass": "disease_4",
+      "pred": "disease_4",
+      "probs": {
+        "normal": 0.0001,
+        "disease_3": 0.1499,
+        "disease_4": 0.85
+      },
+      "methods": {
+        "gradcam": "ok",
+        "lime": "ok",
+        "shap": "ok"
+      }
+    }
+  ],
+  "examples": [
+    "/home/seungeon/Workspace/side/radish/data/valid/[원천]무_0.정상/V006_79_0_00_02_03_12_0_c18_20201223_0022_S01_1.JPG",
+    "/home/seungeon/Workspace/side/radish/data/by_disease/valid/disease_3/images/V006_79_1_03_02_03_12_1_5389e_20201120_19.jpeg",
+    "/home/seungeon/Workspace/side/radish/data/by_disease/valid/disease_4/images/V006_79_1_04_02_03_12_1_5389e_20201106_11.jpeg"
+  ]
+}
