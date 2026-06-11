@@ -27,6 +27,7 @@ matplotlib==3.10.9
 fastapi==0.136.3
 uvicorn[standard]==0.48.0
 python-multipart
+reportlab==4.5.1        # 결과 PDF 출력(/api/report-pdf, 한글 CID 폰트)
 
 # --- notebook (radish_demo.ipynb 실행용) ---
 jupyterlab

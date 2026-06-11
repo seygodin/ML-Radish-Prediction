@@ -229,6 +229,8 @@ done
 
 **VQA (음성/텍스트 질의응답)**: 패널에서 **마이크 녹음·오디오 파일 업로드(wav/mp3/ogg/flac)·텍스트** 중 하나로 질문하면 **whisper-base**가 STT(ffmpeg 없이 soundfile로 디코딩)하고 **SmolVLM-500M**이 선택 이미지에 답한다. `POST /api/vqa`(이미지 + `audio` 또는 `question`). whisper/SmolVLM은 첫 호출 시 지연 로딩(HF 다운로드). 범용 VLM이라 무 질병 특화는 아니며 보조 설명용이다.
 
+**결과 PDF 출력**: Predict 후 우상단 **`📄 결과 PDF 출력`** 버튼을 누르면 현재 이미지(검출 박스 오버레이)+분류표+검출표+VQA를 **A4 PDF**로 구성해 내려받는다. `POST /api/report-pdf`(이미지 + 결과 JSON). 한글은 reportlab 내장 CID 폰트로 렌더링되며, 추가 폰트 설치가 필요 없다.
+
 **Streamlit 버전**: 동일 기능(다중 파이프라인 비교 + 검출 박스 오버레이 + VQA)을 Streamlit으로도 제공한다(`src.inference`·`src.vqa` 재사용).
 
 ```bash

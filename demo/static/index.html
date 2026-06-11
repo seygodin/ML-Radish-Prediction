@@ -110,7 +110,11 @@
 
   <!-- RIGHT -->
   <div class="col right">
-    <h2>결과 비교</h2>
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+      <h2 style="margin:0">결과 비교</h2>
+      <button id="pdfBtn" class="secondary" disabled title="Predict 먼저 실행하세요">📄 결과 PDF 출력</button>
+    </div>
+    <div id="pdfStatus" class="muted" style="margin:6px 0"></div>
     <div id="gtBox"></div>
     <div class="canvas-wrap"><canvas id="imgCanvas"></canvas></div>
     <div class="legend" id="legend"></div>
@@ -151,6 +155,9 @@ let currentImg = new Image();   // displayed image (for canvas)
 let imgNatural = {w:0,h:0};
 let lastDetection = [];
 let lastGtBox = null;
+let lastClassification = [];   // PDF 출력용 마지막 분류 결과
+let lastInput = null;          // PDF 출력용 입력 메타(source/size/ground_truth)
+let lastVqa = null;            // PDF 출력용 마지막 VQA 결과
 let page = { offset:0, limit:16, total:0 };
 
 const $ = s => document.querySelector(s);
@@ -206,7 +213,16 @@ function selectImage(id){
   currentImg.src = `/api/valid-images/${id}/raw`;
   $("#gtBox").innerHTML = "";
   $("#clsResult").innerHTML = "";
+  resetResults();
 }
+
+// 새 이미지 선택/업로드 시 이전 결과 무효화(PDF 버튼 비활성)
+function resetResults(){
+  lastClassification=[]; lastInput=null; lastVqa=null;
+  $("#pdfBtn").disabled = true; $("#pdfBtn").title = "Predict 먼저 실행하세요";
+  setPdfStatus("");
+}
+function setPdfStatus(msg, cls){ const s=$("#pdfStatus"); if(!s) return; s.className=(cls||"")+" muted"; s.textContent=msg; }
 
 $("#fileInput").onchange = e=>{
   const f = e.target.files[0];
@@ -218,6 +234,7 @@ $("#fileInput").onchange = e=>{
                             lastDetection=[]; lastGtBox=null; drawCanvas(); };
   currentImg.src = URL.createObjectURL(f);
   $("#gtBox").innerHTML=""; $("#clsResult").innerHTML="";
+  resetResults();
 };
 
 function drawCanvas(){
@@ -302,7 +319,11 @@ async function predict(){
   if(!resp.ok){ setStatus("오류: "+(await resp.text()),"err"); return; }
   const data = await resp.json();
   lastDetection = data.detection || [];
+  lastClassification = data.classification || [];
+  lastInput = data.input || null;
   lastGtBox = data.input.ground_truth ? data.input.ground_truth.gt_box_xyxy : null;
+  $("#pdfBtn").disabled = false;  // 결과가 있으니 PDF 출력 가능
+  $("#pdfBtn").title = "현재 결과(분류·검출·VQA)를 PDF로 출력";
   // GT panel
   const gt = data.input.ground_truth;
   $("#gtBox").innerHTML = gt
@@ -323,6 +344,36 @@ $("#nextBtn").onclick = ()=>{ page.offset+=page.limit; loadGallery(); };
 $("#selAll").onclick = ()=>document.querySelectorAll(".pchk").forEach(c=>c.checked=true);
 $("#selNone").onclick = ()=>document.querySelectorAll(".pchk").forEach(c=>c.checked=false);
 $("#predictBtn").onclick = predict;
+
+// 결과 PDF 출력: 현재 결과(분류·검출·VQA)+이미지를 서버로 보내 PDF를 받아 다운로드
+async function exportPdf(){
+  if(!lastClassification.length && !lastDetection.length){
+    setPdfStatus("먼저 Predict를 실행하세요.","err"); return;
+  }
+  setPdfStatus("PDF 생성 중...","spinner");
+  const fd = new FormData();
+  if(selectedFile){ fd.append("file", selectedFile); }
+  else if(selectedValidId!==null){ fd.append("valid_image_id", selectedValidId); }
+  else { setPdfStatus("이미지가 없습니다.","err"); return; }
+  fd.append("results", JSON.stringify({
+    input: lastInput, classification: lastClassification,
+    detection: lastDetection, vqa: lastVqa,
+  }));
+  let resp;
+  try { resp = await fetch("/api/report-pdf",{method:"POST",body:fd}); }
+  catch(e){ setPdfStatus("요청 실패: "+e,"err"); return; }
+  if(!resp.ok){ setPdfStatus("오류: "+(await resp.text()),"err"); return; }
+  const blob = await resp.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const cd = resp.headers.get("Content-Disposition")||"";
+  const m = cd.match(/filename="?([^"]+)"?/);
+  a.href = url; a.download = m ? m[1] : "radish_report.pdf";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  setPdfStatus("PDF 다운로드 완료","");
+}
+$("#pdfBtn").onclick = exportPdf;
 
 // ---------------------------------------------------------------------------
 // VQA: mic recording (WebAudio PCM -> WAV) + text fallback
@@ -422,6 +473,7 @@ async function askVqa(wavBlob){
   catch(e){ setVqaStatus("요청 실패: "+e,"err"); return; }
   if(!resp.ok){ setVqaStatus("오류: "+(await resp.text()),"err"); return; }
   const data = await resp.json();
+  lastVqa = { transcript: data.transcript, question: data.question, answer: data.answer };
   $("#recState").textContent = "";
   setVqaStatus("완료","");
   const tr = data.transcript ? `<div class="muted" style="margin-bottom:6px">인식된 질문(STT): <i>${data.transcript}</i></div>` : "";

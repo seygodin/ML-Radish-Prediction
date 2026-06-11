@@ -35,6 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 2026-06-07 | PAPER.md 그림을 base64 내장→외부 figures/*.png 상대참조로 전환(GitHub은 data:URI 미렌더·대용량 md raw표시 → 결과 안 보임). §6.9에 Grad-CAM/LIME/SHAP 결과 정성표 추가. 공개 시 PAPER.md+report/figures/ 동반 | report/PAPER.md, CLAUDE.md | 사용자 "PAPER.md에 XAI 결과가 안 보임, 반영" 요청(그림 외부참조 선택) |
 | 2026-06-07 | Related Work를 4하위섹션 재구성(§4.1 농업AI 7 / §4.2 AI기술 7 / §4.3 설명가능AI 7 / §4.4 차별성). XAI 참고문헌 7개 신규([30]Grad-CAM~[36]DINO), §6.9에 [30][31][32] 인용. 36개 참조 전부 인용·정의 일치 검증 | report/PAPER.md, CLAUDE.md | 사용자 "related work 3그룹×7+차별성" 요청 |
 | 2026-06-07 | §5.0 전체 파이프라인 개요 추가: 사용자 제공 radish_overview.png(DINOv3 사전학습→전이학습 Linear Probing/Fine-tuning→head→예측→평가) 삽입 + 흐름 설명, Ours는 (A)Linear Probing 채택 명시 | report/PAPER.md(§5.0), report/figures/radish_overview.png | 사용자 "전체 플로우 그림+설명 추가" 요청 |
+| 2026-06-08 | FastAPI 데모에 결과 PDF 출력 추가: '📄 결과 PDF 출력' 버튼 → POST /api/report-pdf(이미지+결과JSON)로 분류·검출(박스 오버레이)·VQA를 A4 PDF로 구성. reportlab 내장 한글 CID 폰트(HYSMyeongJo), 오버레이 다운스케일(≈19MB→0.4MB). e2e 검증(valid/upload·VQA유무) | demo/app.py, demo/static/index.html, requirements | 사용자 "결과 PDF 출력 버튼" 요청 |
 
 ## Project goal
 

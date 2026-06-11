@@ -23,9 +23,9 @@ import os
 from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from src import inference
 
@@ -225,6 +225,202 @@ async def api_vqa(
         "answer": result["answer"],
         "image_source": source,
     })
+
+
+# ---------------------------------------------------------------------------
+# API: report-pdf (classification + detection + VQA -> formatted PDF)
+# ---------------------------------------------------------------------------
+_DET_COLORS = ["#ff5d5d", "#ffb13d", "#1aa564", "#9d6dff", "#1f9bd1",
+               "#e6194B", "#3cb44b"]
+_KO_FONT = "HYSMyeongJo-Medium"  # reportlab 내장 한글 CID 폰트
+
+
+def _draw_overlay(pil: "Image.Image", detection: list, gt_box) -> "Image.Image":
+    """검출 박스(파이프라인별 색)와 GT 박스를 원본 좌표로 이미지에 그려 반환."""
+    im = pil.copy()
+    dr = ImageDraw.Draw(im)
+    lw = max(2, round(min(im.size) * 0.004))
+    if gt_box:
+        dr.rectangle(gt_box, outline="#1aa564", width=lw + 1)
+        dr.text((gt_box[0] + 4, max(0, gt_box[1] - 16)), "GT", fill="#1aa564")
+    for i, d in enumerate(detection):
+        col = _DET_COLORS[i % len(_DET_COLORS)]
+        box = d.get("box_xyxy")
+        if not box:
+            continue
+        dr.rectangle(box, outline=col, width=lw)
+        dr.text((box[0] + 4, box[1] + 4),
+                f'{d.get("arch","")} {d.get("objectness",0):.2f}', fill=col)
+    return im
+
+
+def _build_report_pdf(pil: "Image.Image", results: dict) -> bytes:
+    """예측 결과(classification/detection/vqa)를 보기 좋은 A4 PDF로 구성해 bytes 반환."""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import mm
+    from reportlab.lib import colors as rl
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table,
+                                    TableStyle, Image as RLImage)
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+
+    try:
+        pdfmetrics.registerFont(UnicodeCIDFont(_KO_FONT))
+    except Exception:
+        pass  # 이미 등록됨
+
+    styles = getSampleStyleSheet()
+    h1 = ParagraphStyle("h1ko", parent=styles["Title"], fontName=_KO_FONT, fontSize=18)
+    h2 = ParagraphStyle("h2ko", parent=styles["Heading2"], fontName=_KO_FONT, fontSize=12,
+                        spaceBefore=10, spaceAfter=4)
+    body = ParagraphStyle("bodyko", parent=styles["Normal"], fontName=_KO_FONT, fontSize=9,
+                          leading=13)
+    muted = ParagraphStyle("mutedko", parent=body, textColor=rl.grey, fontSize=8)
+
+    inp = results.get("input") or {}
+    gt = inp.get("ground_truth") or None
+    detection = results.get("detection") or []
+    classification = results.get("classification") or []
+    vqa = results.get("vqa") or None
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4, title="무 질병 진단 결과 리포트",
+                            leftMargin=18 * mm, rightMargin=18 * mm,
+                            topMargin=16 * mm, bottomMargin=16 * mm)
+    avail_w = doc.width
+    story = []
+
+    story.append(Paragraph("무(Radish) 질병 진단 결과 리포트", h1))
+    src = inp.get("source", "?")
+    meta = f'입력: {src} · 크기 {inp.get("width","?")}×{inp.get("height","?")}'
+    if gt:
+        meta += f' · Ground Truth 클래스: <b>{gt.get("true_klass")}</b>'
+        if gt.get("gt_box_xyxy"):
+            meta += f' · GT box [{", ".join(f"{v:.0f}" for v in gt["gt_box_xyxy"])}]'
+    story.append(Paragraph(meta, muted))
+    story.append(Spacer(1, 6))
+
+    # --- 이미지 (검출 오버레이) ---
+    gt_box = gt.get("gt_box_xyxy") if gt else None
+    overlay = _draw_overlay(pil, detection, gt_box)
+    # 인쇄 해상도면 충분하므로 임베드 전 다운스케일(PDF 용량 절감)
+    long_side = max(overlay.size)
+    if long_side > 1400:
+        s = 1400 / long_side
+        overlay = overlay.resize((round(overlay.width * s), round(overlay.height * s)),
+                                 Image.LANCZOS)
+    img_buf = io.BytesIO()
+    overlay.save(img_buf, format="JPEG", quality=88)
+    img_buf.seek(0)
+    iw, ih = overlay.size
+    disp_w = min(avail_w, 150 * mm)
+    disp_h = disp_w * ih / iw
+    max_h = 110 * mm
+    if disp_h > max_h:
+        disp_h = max_h
+        disp_w = disp_h * iw / ih
+    story.append(Paragraph("입력 이미지 + 검출 박스 (빨강·주황…=파이프라인, 초록=GT)", h2))
+    story.append(RLImage(img_buf, width=disp_w, height=disp_h))
+    story.append(Spacer(1, 4))
+
+    # --- 분류 ---
+    story.append(Paragraph("분류 (Classification)", h2))
+    if classification:
+        order = ["normal_vs_d3", "normal_vs_d4", "normal_d3_d4"]
+        groups = {}
+        for c in classification:
+            groups.setdefault(c.get("setting", "?"), []).append(c)
+        for setting in [s for s in order if s in groups] + [s for s in groups if s not in order]:
+            story.append(Paragraph(f"<b>[{setting}]</b>", body))
+            data = [["백본 (arch)", "예측", "클래스별 확률"]]
+            for c in groups[setting]:
+                probs = "  ".join(f'{n}={p*100:.1f}%'
+                                  for n, p in zip(c.get("class_names", []), c.get("probs", [])))
+                data.append([c.get("arch", ""), c.get("pred_class", ""), probs])
+            tbl = Table(data, colWidths=[avail_w * 0.26, avail_w * 0.22, avail_w * 0.52])
+            tbl.setStyle(TableStyle([
+                ("FONTNAME", (0, 0), (-1, -1), _KO_FONT),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                ("BACKGROUND", (0, 0), (-1, 0), rl.HexColor("#1f3b5c")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), rl.white),
+                ("GRID", (0, 0), (-1, -1), 0.4, rl.HexColor("#cccccc")),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [rl.white, rl.HexColor("#f3f6fa")]),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+            ]))
+            story.append(tbl)
+            story.append(Spacer(1, 4))
+    else:
+        story.append(Paragraph("선택된 분류 파이프라인 없음.", muted))
+
+    # --- 검출 ---
+    story.append(Paragraph("검출 (Detection — 이미지 단위 질병 유무 + 박스)", h2))
+    if detection:
+        data = [["백본 (arch)", "objectness", "판정", "box (xyxy)"]]
+        for d in detection:
+            box = d.get("box_xyxy") or []
+            data.append([d.get("arch", ""), f'{d.get("objectness",0):.3f}',
+                         "질병" if d.get("is_disease") else "정상",
+                         "[" + ", ".join(f"{v:.0f}" for v in box) + "]"])
+        tbl = Table(data, colWidths=[avail_w * 0.26, avail_w * 0.18, avail_w * 0.14, avail_w * 0.42])
+        tbl.setStyle(TableStyle([
+            ("FONTNAME", (0, 0), (-1, -1), _KO_FONT),
+            ("FONTSIZE", (0, 0), (-1, -1), 8),
+            ("BACKGROUND", (0, 0), (-1, 0), rl.HexColor("#1f3b5c")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), rl.white),
+            ("GRID", (0, 0), (-1, -1), 0.4, rl.HexColor("#cccccc")),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [rl.white, rl.HexColor("#f3f6fa")]),
+            ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ]))
+        story.append(tbl)
+    else:
+        story.append(Paragraph("선택된 검출 파이프라인 없음.", muted))
+
+    # --- VQA ---
+    story.append(Paragraph("VQA (질의응답 — SmolVLM + whisper)", h2))
+    if vqa and (vqa.get("answer") or vqa.get("question")):
+        if vqa.get("transcript"):
+            story.append(Paragraph(f'<b>인식된 질문(STT)</b>: {vqa["transcript"]}', body))
+        story.append(Paragraph(f'<b>질문</b>: {vqa.get("question") or "(없음)"}', body))
+        story.append(Paragraph(f'<b>답변</b>: {vqa.get("answer") or "(없음)"}', body))
+    else:
+        story.append(Paragraph("VQA를 실행하지 않았습니다.", muted))
+
+    story.append(Spacer(1, 10))
+    story.append(Paragraph(
+        "baseline=from-scratch, Ours=DINOv3 pretrained(frozen). 범용 VQA(SmolVLM)는 보조 설명용이며 "
+        "질병 판정은 분류/검출 파이프라인이 담당합니다. 자세한 지표는 report/PAPER.md 참조.", muted))
+
+    doc.build(story)
+    return buf.getvalue()
+
+
+@app.post("/api/report-pdf")
+async def api_report_pdf(
+    file: Optional[UploadFile] = File(None),
+    valid_image_id: Optional[int] = Form(None),
+    results: str = Form(...),
+):
+    """POST /api/report-pdf — 프론트의 예측 결과(JSON)+이미지로 결과 리포트 PDF 생성·반환."""
+    import json
+    raw = await file.read() if file is not None else None
+    pil, source, valid_id, ground_truth = _resolve_image(raw, valid_image_id)
+    try:
+        parsed = json.loads(results)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"invalid results JSON: {e}")
+    # input 메타는 신뢰 가능한 서버측 값으로 보정(GT는 valid일 때만 존재)
+    parsed.setdefault("input", {})
+    parsed["input"].update({"source": source, "width": pil.size[0], "height": pil.size[1],
+                            "valid_id": valid_id, "ground_truth": ground_truth})
+    try:
+        pdf = _build_report_pdf(pil, parsed)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF 생성 실패: {e}")
+    fname = f"radish_report_{source}_{valid_id if valid_id is not None else 'upload'}.pdf"
+    return Response(content=pdf, media_type="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="{fname}"'})
 
 
 # ---------------------------------------------------------------------------
